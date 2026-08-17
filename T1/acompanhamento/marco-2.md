@@ -4,10 +4,10 @@
 
 ### Histórico de Versões
 
-| Versão | Data | Descrição das Alterações | Grupo   |
-| :--- | :--- | :--- |:--------|
-| 1.0 | 15/08/2026 | Criação do documento e estrutura inicial | F |
-| | | |         |
+| Versão | Data       | Descrição das Alterações                 | Grupo   |
+|:-------|:-----------|:-----------------------------------------|:--------|
+| 1.0    | 15/08/2026 | Criação do documento e estrutura inicial | F |
+| 1.1    | 17/08/2026 | Simplificação                            | F |
 
 ---
 
@@ -15,7 +15,7 @@
 
 **Estrutura de Dados Selecionada:**
 
-Lista de adjacência implementada como um `defaultdict(list)` do módulo `collections`, no qual a **chave é o número original do andar** (não um índice comprimido sequencial) e o **valor é a lista de andares vizinhos** (andares diretamente acessíveis por uma escada).
+Lista de adjacência implementada através de uma tabela hash (defaultdict com listas), onde a chave é o identificador único do andar e o valor associado é uma lista contendo os andares vizinhos diretamente conectados.
 
 **Justificativa:**
 
@@ -33,58 +33,9 @@ Essa estrutura garante complexidade espacial e temporal $O(V + E)$, adequada par
 
 **Processo de Construção:**
 
-1. A entrada é lida do `stdin` e convertida diretamente em um **`numpy.array`** de shape $(N, 2)$ e `dtype=np.int64` (conforme especificado no Marco 1), garantindo suporte a valores de andar de até $10^9$ sem risco de overflow.
-2. Para cada linha `[A_i, B_i]` do array (cada escada), a aresta é inserida **simetricamente** no dicionário de adjacência: `grafo[A_i].append(B_i)` e `grafo[B_i].append(A_i)`, refletindo que o grafo é **não direcionado**.
-3. Como o `defaultdict(list)` cria automaticamente uma lista vazia para qualquer chave não existente, a presença do **andar 1** no dicionário é garantida por meio de um acesso explícito (`grafo[1]`) logo após a construção — isso assegura que o vértice de partida sempre exista na estrutura, mesmo que ele não apareça em nenhuma escada (caso do Sample 3 do Marco 1, cuja resposta é 1).
-
-**Trecho de Código / Lógica Principal:**
-
-```python
-import sys
-import numpy as np
-from collections import defaultdict
-
-
-def ler_entrada():
-    """
-    Lê a entrada padrão e retorna um numpy.array de shape (N, 2),
-    dtype=np.int64, onde cada linha é o par (A_i, B_i) de uma escada.
-    """
-    data = sys.stdin.read().split()
-    n = int(data[0])
-    valores = np.array(data[1:1 + 2 * n], dtype=np.int64)
-    edges = valores.reshape(n, 2)
-    return edges
-
-
-def construir_grafo(edges):
-    """
-    Constrói a lista de adjacência do grafo G = (V, E) usando
-    defaultdict(list), com o número original do andar como chave.
-
-    Otimização: edges.tolist() converte o numpy.array inteiro para
-    uma lista nativa do Python em uma única operação vetorizada,
-    evitando o overhead de conversão np.int64 -> int a cada iteração
-    do loop (o que seria necessário se iterássemos diretamente sobre
-    o array do numpy).
-
-    Parâmetros:
-        edges: numpy.array (N, 2) com os pares (A_i, B_i).
-
-    Retorna:
-        grafo: defaultdict(list) tal que grafo[andar] contém a
-               lista de andares vizinhos (grafo não direcionado).
-    """
-    grafo = defaultdict(list)
-
-    for a, b in edges.tolist():  # conversão em lote, iteração em Python puro
-        grafo[a].append(b)
-        grafo[b].append(a)  # aresta bidirecional (grafo não direcionado)
-
-    grafo[1]  # garante a presença do andar 1, mesmo que isolado
-
-    return grafo
-```
+1. A entrada é lida e convertida diretamente em um **`numpy.array`** de shape $(N, 2)$ e `dtype=np.int64`
+2. Para cada linha `[A_i, B_i]` do array (cada escada), a aresta é inserida **simetricamente** no dicionário de adjacência,refletindo que o grafo é **não direcionado**.
+3. A presença do **andar 1** no dicionário é garantida por meio de um acesso explícito, isso assegura que o vértice de partida sempre exista na estrutura, mesmo que ele não apareça em nenhuma escada (caso do Sample 3 do Marco 1, cuja resposta é 1).
 
 ---
 
@@ -123,16 +74,6 @@ Essas medidas confirmam a teoria apresentada no Marco 1 (Seção 2): o grafo é 
 4 3
 4 10
 8 3
-```
-
-**Código de Impressão (para validação visual):**
-
-```python
-if __name__ == "__main__":
-    edges = ler_entrada()
-    grafo = construir_grafo(edges)
-
-    print(dict(grafo))
 ```
 
 **Estado Final da Memória (Lista de Adjacência Gerada):**

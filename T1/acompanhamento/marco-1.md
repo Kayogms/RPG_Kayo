@@ -4,10 +4,11 @@
 
 ### Histórico de Versões
 
-| Versão | Data | Descrição das Alterações | Grupo   |
-| :--- | :--- | :--- |:--------|
-| 1.0 | 14/08/2026 | Criação do documento e estrutura inicial | F |
-| 1.1 | 15/08/2026 | Ajuste da hipótese: Inclusão do DSU como validador exclusivo das buscas BFS/DFS | F |
+| Versão | Data       | Descrição das Alterações                                                        | Grupo   |
+|:-------|:-----------|:--------------------------------------------------------------------------------|:--------|
+| 1.0    | 14/08/2026 | Criação do documento e estrutura inicial                                        | F |
+| 1.1    | 15/08/2026 | Ajuste da hipótese: Inclusão do DSU como validador exclusivo das buscas BFS/DFS | F |
+| 1.2    | 17/08/2026 | Simplificação                                                                   | F |
 ---
 
 ## 1. Enunciado, Entrada, Saída e Restrições
@@ -27,27 +28,8 @@ Takahashi pode se mover livremente dentro do mesmo andar, mas não pode se mover
 
 ## Entrada
 
-```python
-edges = np.array([
-[A1, B1],
-[A2, B2],
-...
-[AN, BN]
-],dtype=np.int64)
-```
+Alcançar o andar mais alto possível a partir do andar 1, usando $N$ escadas bidirecionais.Entrada: A entrada consiste em um número inteiro $N$ que indica a quantidade de escadas, seguido por $N$ linhas, onde cada uma contém dois números inteiros representando os andares conectados por uma escada ($A_i$ e $B_i$). Para fins de processamento, esses pares são organizados em uma estrutura de matriz com duas colunas, permitindo o armazenamento eficiente de todas as conexões do grafo. É essencial utilizar tipos de dados de 64 bits para representar os andares, uma vez que o valor pode atingir $10^9$, evitando erros de estouro de memória (overflow).
 
-**Formato de leitura:** A entrada deve ser lida e armazenada em um numpy.array, de forma que os pares $(A_i, B_i)$ fiquem organizados em uma matriz de shape $(N, 2)$, por exemplo:
-```python
-import numpy as np
-
-N = int(input())
-edges = np.array([list(map(int, input().split())) for _ in range(N)], dtype=np.int64)
-# edges.shape == (N, 2)
-# edges[:, 0] -> coluna com todos os A_i
-# edges[:, 1] -> coluna com todos os B_i
-```
-
- **Observação:** Usar dtype=np.int64 é importante, já que $A_i, B_i$ podem chegar a $10^9$, valor que ainda cabe em int64, mas poderia gerar problemas de overflow se int32 fosse usado por engano.
 ## Saída
 
 Um único inteiro representando o andar mais alto alcançável.
@@ -56,7 +38,7 @@ Um único inteiro representando o andar mais alto alcançável.
 
 - $1 \le N \le 2\times10^5$
 - $1 \le A_i, B_i \le 10^9$
-- $A_i \ne B_i$ (no enunciado original consta "$A_i = B_i$", provável erro de digitação — o sentido lógico, confirmado pelos exemplos, é que os extremos de cada escada são sempre diferentes)
+- $A_i \ne B_i$  o sentido lógico, confirmado pelos exemplos, é que os extremos de cada escada são sempre diferentes
 - Todos os valores de entrada são inteiros
 
 ## Observações Importantes
