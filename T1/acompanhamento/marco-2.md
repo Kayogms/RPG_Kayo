@@ -1,13 +1,13 @@
 # Marco 2 — Representação Computacional: Ladder Takahashi (Problema I)
 
-**Data de Criação:** 15/08/2026  
+**Data de Criação:** 15/08/2026
 
 ### Histórico de Versões
 
-| Versão | Data       | Descrição das Alterações                 | Grupo   |
-|:-------|:-----------|:-----------------------------------------|:--------|
-| 1.0    | 15/08/2026 | Criação do documento e estrutura inicial | F |
-| 1.1    | 17/08/2026 | Simplificação                            | F |
+| Versão | Data       | Descrição das Alterações               | Grupo |
+| :------ | :--------- | :----------------------------------------- | :---- |
+| 1.0     | 15/08/2026 | Criação do documento e estrutura inicial | F     |
+| 1.1     | 17/08/2026 | Simplificação                            | F     |
 
 ---
 
@@ -44,18 +44,16 @@ Essa estrutura garante complexidade espacial e temporal $O(V + E)$, adequada par
 **Análise do Grafo Construído (referente ao Sample 1):**
 
 - **Número total de vértices instanciados ($|V|$):** 5 andares distintos foram instanciados no dicionário: $\{1, 3, 4, 8, 10\}$.
-
 - **Número de arestas lidas ($|E|$):** 4 escadas foram lidas da entrada, correspondendo a $|E| = 4$ arestas no grafo.
-
 - **Grau dos vértices ($d(v)$):**
 
-| Andar (vértice) | Grau $d(v)$ | Vizinhos |
-|:---:|:---:|:---|
-| 1  | 1 | [4] |
-| 3  | 2 | [4, 8] |
-| 4  | 3 | [1, 3, 10] |
-| 8  | 1 | [3] |
-| 10 | 1 | [4] |
+| Andar (vértice) | Grau$d(v)$ | Vizinhos   |
+| :--------------: | :----------: | :--------- |
+|        1        |      1      | [4]        |
+|        3        |      2      | [4, 8]     |
+|        4        |      3      | [1, 3, 10] |
+|        8        |      1      | [3]        |
+|        10        |      1      | [4]        |
 
 O andar **4** possui o **grau máximo** ($d(4) = 3$), sendo o andar com mais conexões diretas — condizente com o fato de ele ser o "andar-hub" que liga o ponto de partida (andar 1) aos andares 3 e 10.
 
@@ -68,6 +66,7 @@ Essas medidas confirmam a teoria apresentada no Marco 1 (Seção 2): o grafo é 
 ## 4. Validação da Representação (Instância Pequena)
 
 **Entrada do Sample 1:**
+
 ```text
 4
 1 4
