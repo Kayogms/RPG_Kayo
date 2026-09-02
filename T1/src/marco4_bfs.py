@@ -1,87 +1,124 @@
-# =================================================================
-# marco4_bfs.py
-# Marco 4 — Aplicação básica de BFS e conclusão.
-# Executa a BFS a partir do andar 1, valida o resultado comparando
-# com o DSU e com a DFS do Marco 3, e imprime a resposta final
-# (pronta para integração/submissão ao AtCoder).
-# =================================================================
+"""
+=================================================================
+ marco4_bfs.py
+ Marco 4 - Aplicação básica de BFS e conclusão: Ladder Takahashi
+ (Problema I)
 
-from grafo_base import LeitorEntrada, Graph, DSU, validar_estrutura
+ Reaproveita algs4.breadth_first_paths.BreadthFirstPaths SEM
+ NENHUMA modificação em sua lógica interna, comparando o resultado
+ com DFS (Marco 3), UF e CC (oráculos independentes), e definindo
+ a BFS como método de submissão final ao AtCoder.
+=================================================================
+"""
+
+from grafo_base import (
+    LeitorEntrada,
+    LadderSymbolGraph,
+    validar_estrutura,
+    maior_andar_via_uf,
+    maior_andar_via_cc,
+)
 from marco3_dfs import ValidadorDFS
+from algs4.graph import Graph
+from algs4.breadth_first_paths import BreadthFirstPaths
 
 
+# -----------------------------------------------------------------
+# 1. BFS — reaproveitando BreadthFirstPaths sem alterações
+# -----------------------------------------------------------------
+def maior_andar_via_bfs(G: Graph, sg: LadderSymbolGraph, origem_idx):
+    """
+    Executa a BFS de referência (algs4.breadth_first_paths.
+    BreadthFirstPaths) SEM NENHUMA modificação em sua lógica interna
+    (marked[], edge_to[]), e obtém o maior andar alcançável
+    pós-processando o vetor de alcançabilidade já calculado por ela
+    (has_path_to), em vez de alterar o algoritmo de busca em si.
+    """
+    bfs = BreadthFirstPaths(G, origem_idx)
+    maior = sg.name(origem_idx)
+    for v in range(G.V):
+        if bfs.has_path_to(v):
+            maior = max(maior, sg.name(v))
+    return maior, bfs
+
+
+# -----------------------------------------------------------------
+# 2. VALIDADOR DO MARCO 4 — compara BFS x DFS x UF x CC
+# -----------------------------------------------------------------
 class ValidadorBFS:
     """
     Validador do Marco 4:
       1. Executa a BFS a partir da origem.
-      2. Exibe níveis (distâncias), predecessores e o maior andar
-         alcançado.
-      3. Compara o resultado da BFS com o DSU (oráculo) e com a DFS
-         (já validada no Marco 3), fechando a comparação tripla.
+      2. Exibe o maior andar alcançado.
+      3. Compara o resultado com DFS (já validada no Marco 3), UF e
+         CC, fechando a comparação entre os quatro métodos.
     """
 
     @staticmethod
-    def validar(grafo: Graph, edges, origem=1, maior_dfs=None):
-        resultado_bfs = grafo.bfs(origem)
+    def validar(sg: LadderSymbolGraph, edges, origem=1, maior_dfs=None):
+        G = sg.graph()
+        origem_idx = sg.index(origem)
+
+        maior_bfs, _ = maior_andar_via_bfs(G, sg, origem_idx)
 
         print("=== Execução da BFS ===")
         print(f"Origem:                 {origem}")
-        print(f"Vértices visitados:     {sorted(resultado_bfs['visitados'])}")
-        print(f"Níveis (distâncias):    {resultado_bfs['nivel']}")
-        print(f"Predecessores:          {resultado_bfs['predecessor']}")
-        print(f"Maior andar (BFS):      {resultado_bfs['maior_andar']}")
+        print(f"Maior andar (BFS):      {maior_bfs}")
         print()
 
-        # --- Comparação com o DSU (oráculo) ---
-        dsu = DSU.construir_de_arestas(edges, origem=origem)
-        maior_dsu = dsu.maior_no_conjunto(origem)
+        maior_uf = maior_andar_via_uf(edges, sg, origem_idx)
+        maior_cc = maior_andar_via_cc(G, sg, origem_idx)
 
-        print("=== Comparação BFS x DSU x DFS ===")
-        print(f"BFS -> maior andar alcançável: {resultado_bfs['maior_andar']}")
-        print(f"DSU -> maior andar alcançável: {maior_dsu}")
+        print("=== Comparação BFS x DFS x UF x CC ===")
+        print(f"BFS -> maior andar alcançável: {maior_bfs}")
         if maior_dfs is not None:
             print(f"DFS -> maior andar alcançável: {maior_dfs}")
+        print(f"UF  -> maior andar alcançável: {maior_uf}")
+        print(f"CC  -> maior andar alcançável: {maior_cc}")
 
-        valores = [resultado_bfs["maior_andar"], maior_dsu]
+        valores = {maior_bfs, maior_uf, maior_cc}
         if maior_dfs is not None:
-            valores.append(maior_dfs)
+            valores.add(maior_dfs)
 
-        assert len(set(valores)) == 1, (
-            f"Divergência entre métodos! Valores obtidos: {valores}"
-        )
-        print(f"[OK] Todos os métodos concordam: resposta = {resultado_bfs['maior_andar']}")
+        assert len(valores) == 1, f"Divergência entre métodos! Valores: {valores}"
+        print(f"[OK] Todos os métodos concordam: resposta = {maior_bfs}")
 
-        return resultado_bfs["maior_andar"]
+        return maior_bfs
 
 
+# -----------------------------------------------------------------
+# 3. SUBMISSÃO FINAL (AtCoder)
+# -----------------------------------------------------------------
 def resolver_para_submissao(origem=1):
     """
     Pipeline final de resolução, adequado para submissão ao
-    AtCoder (sem prints de depuração/validação): usa BFS como
-    método escolhido (justificativa a ser registrada no Marco 4),
-    e imprime apenas o resultado.
+    AtCoder (sem prints de depuração/validação): usa a BFS de
+    referência (BreadthFirstPaths) como método escolhido — ver
+    justificativa no Marco 4, Seção 4 — e imprime apenas o resultado.
     """
     edges = LeitorEntrada.ler()
-    grafo = Graph().construir(edges, vertice_partida=origem)
-    resultado = grafo.bfs(origem)
-    print(resultado["maior_andar"])
+    sg = LadderSymbolGraph(edges, vertice_partida=origem)
+    G = sg.graph()
+    origem_idx = sg.index(origem)
+    maior, _ = maior_andar_via_bfs(G, sg, origem_idx)
+    print(maior)
 
 
 def main_desenvolvimento():
     """
     Pipeline de desenvolvimento/testes (Sample 1), com validação
-    estrutural, DFS, BFS e DSU, todos comparados entre si.
+    estrutural, DFS, BFS, UF e CC, todos comparados entre si.
     """
     edges = LeitorEntrada.ler()
-    grafo = Graph().construir(edges, vertice_partida=1)
+    sg = LadderSymbolGraph(edges, vertice_partida=1)
 
-    validar_estrutura(grafo)
+    validar_estrutura(sg)
     print()
 
-    maior_dfs = ValidadorDFS.validar(grafo, edges, origem=1)
+    maior_dfs = ValidadorDFS.validar(sg, edges, origem=1)
     print()
 
-    ValidadorBFS.validar(grafo, edges, origem=1, maior_dfs=maior_dfs)
+    ValidadorBFS.validar(sg, edges, origem=1, maior_dfs=maior_dfs)
 
 
 if __name__ == "__main__":

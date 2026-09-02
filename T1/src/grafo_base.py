@@ -1,13 +1,36 @@
-# =================================================================
-# grafo_base.py
-# Módulo comum reutilizado pelos Marcos 2, 3 e 4.
-# Contém: leitura da entrada, representação do grafo (com medidas
-# estruturais e os métodos de busca DFS/BFS) e o DSU (oráculo).
-# =================================================================
+"""
+=================================================================
+ grafo_base.py
+ Módulo comum reutilizado pelos Marcos 2, 3 e 4 - Ladder Takahashi.
+
+ Reaproveita SEM ALTERAÇÃO NA LÓGICA:
+   - algs4.graph.Graph   (representação do grafo, via array de Bag)
+   - algs4.bag.Bag        (lista de adjacência, usada internamente
+                            por Graph)
+   - algs4.uf.UF          (Union-Find - oráculo de validação)
+   - algs4.cc.CC          (Connected Components via DFS - segundo
+                            oráculo, independente do UF)
+
+ Reimplementa o CONCEITO de:
+   - algs4.symbol_graph.SymbolGraph -> LadderSymbolGraph
+     (mapeamento de chaves arbitrárias para índices via tabela de
+     símbolos; aqui a fonte é um numpy.array em vez de um arquivo
+     com delimitador, e a tabela de símbolos é um dict nativo do
+     Python, já que algs4.st.ST não foi fornecido pelo grupo).
+
+ Observação: BreadthFirstPaths (BFS) NÃO é importada neste módulo
+ de propósito — ela só é introduzida em marco4_bfs.py, preservando
+ a progressão pedagógica do trabalho (DFS no Marco 3, BFS no
+ Marco 4).
+=================================================================
+"""
 
 import sys
 import numpy as np
-from collections import defaultdict, deque
+
+from algs4.graph import Graph
+from algs4.uf import UF
+from algs4.cc import CC
 
 
 # -----------------------------------------------------------------
@@ -15,7 +38,7 @@ from collections import defaultdict, deque
 # -----------------------------------------------------------------
 class LeitorEntrada:
     """
-    Lê a entrada padrão no formato especificado no Marco 1:
+    Lê a entrada padrão no formato definido no Marco 1:
         N
         A1 B1
         A2 B2
@@ -40,180 +63,91 @@ class LeitorEntrada:
 
 
 # -----------------------------------------------------------------
-# 2. GRAFO — REPRESENTAÇÃO, MEDIDAS ESTRUTURAIS E BUSCAS
+# 2. COMPRESSÃO DE COORDENADAS + CONSTRUÇÃO DO Graph (algs4.graph)
+#    (adaptação do conceito de algs4.symbol_graph.SymbolGraph)
 # -----------------------------------------------------------------
-class Graph:
+class LadderSymbolGraph:
     """
-    Lista de adjacência (defaultdict(list)), usando o número
-    original do andar como chave (ver justificativa no Marco 2).
-    Grafo não direcionado, não ponderado, esparso e potencialmente
-    desconexo (ver Marco 1, Seção 2).
-    """
+    Adaptação de SymbolGraph (algs4/symbol_graph.py) para o problema
+    Ladder Takahashi.
 
-    def __init__(self):
-        self.adj = defaultdict(list)
-
-    # --- Construção (Marco 2) ------------------------------------
-    def construir(self, edges, vertice_partida=1):
-        for a, b in edges.tolist():  # conversão em lote (ver Marco 2)
-            self.adj[a].append(b)
-            self.adj[b].append(a)
-
-        self.adj[vertice_partida]  # garante a chave, mesmo se isolado
-        return self
-
-    # --- Acesso básico ----------------------------------------------
-    def vizinhos(self, v):
-        return self.adj[v]
-
-    def vertices(self):
-        return list(self.adj.keys())
-
-    def grau(self, v):
-        return len(self.adj[v])
-
-    def __len__(self):
-        return len(self.adj)
-
-    def __repr__(self):
-        return repr(dict(self.adj))
-
-    # --- Medidas estruturais (Marco 2 / Unidade I) -------------------
-    def medidas_estruturais(self, num_arestas):
-        graus = {v: self.grau(v) for v in self.adj}
-        num_vertices = len(self.adj)
-
-        andar_grau_maximo = max(graus, key=graus.get)
-        andar_grau_minimo = min(graus, key=graus.get)
-        vertices_isolados = [v for v, g in graus.items() if g == 0]
-
-        densidade = (
-            num_arestas / (num_vertices * (num_vertices - 1) / 2)
-            if num_vertices > 1 else 0.0
-        )
-
-        return {
-            "num_vertices": num_vertices,
-            "num_arestas": num_arestas,
-            "graus": graus,
-            "grau_maximo": graus[andar_grau_maximo],
-            "andar_grau_maximo": andar_grau_maximo,
-            "grau_minimo": graus[andar_grau_minimo],
-            "andar_grau_minimo": andar_grau_minimo,
-            "vertices_isolados": vertices_isolados,
-            "densidade": densidade,
-        }
-
-    # --- Marco 3: DFS -------------------------------------------------
-    def dfs(self, origem):
-        """
-        DFS iterativa (pilha explícita) a partir de `origem`.
-        Retorna: visitados, predecessor, ordem_visita, maior_andar.
-        """
-        visitados = {origem}
-        predecessor = {origem: None}
-        ordem_visita = []
-        pilha = [origem]
-        maior_andar = origem
-
-        while pilha:
-            atual = pilha.pop()
-            ordem_visita.append(atual)
-            maior_andar = max(maior_andar, atual)
-
-            for vizinho in self.adj[atual]:
-                if vizinho not in visitados:
-                    visitados.add(vizinho)
-                    predecessor[vizinho] = atual
-                    pilha.append(vizinho)
-
-        return {
-            "visitados": visitados,
-            "predecessor": predecessor,
-            "ordem_visita": ordem_visita,
-            "maior_andar": maior_andar,
-        }
-
-    # --- Marco 4: BFS -------------------------------------------------
-    def bfs(self, origem):
-        """
-        BFS a partir de `origem`.
-        Retorna: visitados, nivel, predecessor, maior_andar.
-        """
-        visitados = {origem}
-        nivel = {origem: 0}
-        predecessor = {origem: None}
-        fila = deque([origem])
-        maior_andar = origem
-
-        while fila:
-            atual = fila.popleft()
-            maior_andar = max(maior_andar, atual)
-
-            for vizinho in self.adj[atual]:
-                if vizinho not in visitados:
-                    visitados.add(vizinho)
-                    nivel[vizinho] = nivel[atual] + 1
-                    predecessor[vizinho] = atual
-                    fila.append(vizinho)
-
-        return {
-            "visitados": visitados,
-            "nivel": nivel,
-            "predecessor": predecessor,
-            "maior_andar": maior_andar,
-        }
-
-
-# -----------------------------------------------------------------
-# 3. UNION-FIND / DSU (oráculo de validação)
-# -----------------------------------------------------------------
-class DSU:
-    """
-    Conjuntos Disjuntos com compressão de caminho e união por rank.
-    Usado exclusivamente como método alternativo de conectividade
-    para validar DFS e BFS — não faz parte da solução final.
+    Interface mantida idêntica à original:
+      - contains(chave) -> bool
+      - index(chave)    -> índice comprimido
+      - name(índice)    -> chave original (andar)
+      - graph()         -> instância de algs4.graph.Graph já construída
     """
 
-    def __init__(self):
-        self.parent = {}
-        self.rank = {}
+    def __init__(self, edges, vertice_partida=1):
+        self._st = {}  # equivalente a ST(): {andar_original: índice}
 
-    def make_set(self, v):
-        if v not in self.parent:
-            self.parent[v] = v
-            self.rank[v] = 0
-
-    def find(self, v):
-        self.make_set(v)
-        if self.parent[v] != v:
-            self.parent[v] = self.find(self.parent[v])
-        return self.parent[v]
-
-    def union(self, a, b):
-        self.make_set(a)
-        self.make_set(b)
-        raiz_a, raiz_b = self.find(a), self.find(b)
-        if raiz_a == raiz_b:
-            return
-        if self.rank[raiz_a] < self.rank[raiz_b]:
-            raiz_a, raiz_b = raiz_b, raiz_a
-        self.parent[raiz_b] = raiz_a
-        if self.rank[raiz_a] == self.rank[raiz_b]:
-            self.rank[raiz_a] += 1
-
-    def maior_no_conjunto(self, origem):
-        raiz_origem = self.find(origem)
-        return max(v for v in self.parent if self.find(v) == raiz_origem)
-
-    @classmethod
-    def construir_de_arestas(cls, edges, origem=1):
-        """Constrói um DSU já unindo todas as arestas fornecidas."""
-        dsu = cls()
         for a, b in edges.tolist():
-            dsu.union(a, b)
-        dsu.make_set(origem)
-        return dsu
+            if a not in self._st:
+                self._st[a] = len(self._st)
+            if b not in self._st:
+                self._st[b] = len(self._st)
+
+        # Garante a presença do vértice de partida, mesmo isolado
+        if vertice_partida not in self._st:
+            self._st[vertice_partida] = len(self._st)
+
+        # Vetor inverso índice -> andar original
+        self._keys = [0] * len(self._st)
+        for andar, idx in self._st.items():
+            self._keys[idx] = andar
+
+        # Constrói o Graph de referência (algs4.graph.Graph), sem
+        # nenhuma modificação em sua lógica interna
+        self._G = Graph(len(self._st))
+        for a, b in edges.tolist():
+            self._G.add_edge(self._st[a], self._st[b])
+
+    def contains(self, andar):
+        return andar in self._st
+
+    def index(self, andar):
+        return self._st[andar]
+
+    def name(self, v):
+        return self._keys[v]
+
+    def num_vertices(self):
+        return len(self._keys)
+
+    def graph(self):
+        return self._G
+
+
+# -----------------------------------------------------------------
+# 3. ORÁCULOS DE VALIDAÇÃO — UF e CC (algs4, sem alteração)
+# -----------------------------------------------------------------
+def maior_andar_via_uf(edges, sg: LadderSymbolGraph, origem_idx):
+    """
+    Usa algs4.uf.UF (weighted quick-union com path compression) como
+    oráculo independente de conectividade.
+    """
+    uf = UF(sg.num_vertices())
+    for a, b in edges.tolist():
+        uf.union(sg.index(a), sg.index(b))
+
+    maior = sg.name(origem_idx)
+    for v in range(sg.num_vertices()):
+        if uf.connected(v, origem_idx):
+            maior = max(maior, sg.name(v))
+    return maior
+
+
+def maior_andar_via_cc(G: Graph, sg: LadderSymbolGraph, origem_idx):
+    """
+    Usa algs4.cc.CC (componentes conexas via DFS recursiva) como um
+    segundo oráculo independente de conectividade.
+    """
+    cc = CC(G)
+    maior = sg.name(origem_idx)
+    for v in range(G.V):
+        if cc.connected(v, origem_idx):
+            maior = max(maior, sg.name(v))
+    return maior
 
 
 # -----------------------------------------------------------------
@@ -228,12 +162,14 @@ ESPERADO_SAMPLE_1 = {
 }
 
 
-def validar_estrutura(grafo: Graph):
-    """Confere a lista de adjacência contra o Sample 1 (Marco 2)."""
+def validar_estrutura(sg: LadderSymbolGraph):
+    """Confere a lista de adjacência (Graph/Bag) contra o Sample 1."""
+    G = sg.graph()
     for andar, vizinhos_esperados in ESPERADO_SAMPLE_1.items():
-        vizinhos_obtidos = set(grafo.vizinhos(andar))
+        idx = sg.index(andar)
+        vizinhos_obtidos = {sg.name(w) for w in G.adj[idx]}
         assert vizinhos_obtidos == vizinhos_esperados, (
-            f"Falha na validação estrutural: andar {andar} — "
+            f"Falha na validação estrutural: andar {andar} - "
             f"esperado {vizinhos_esperados}, obtido {vizinhos_obtidos}"
         )
-    print("[OK] Validação estrutural (lista de adjacência) — Sample 1")
+    print("[OK] Validação estrutural (lista de adjacência) - Sample 1")
