@@ -14,30 +14,21 @@
 ## 1. Escolha da Representação Computacional
 
 **Estrutura de Dados Selecionada:**
-
-Lista de adjacência implementada através de uma tabela hash (defaultdict com listas), onde a chave é o identificador único do andar e o valor associado é uma lista contendo os andares vizinhos diretamente conectados.
+Tabela de símbolos para compressão de coordenadas (`LadderSymbolGraph`) combinada com uma Lista de Adjacência nativa (`algs4.graph.Graph`, baseada em arrays de `algs4.bag.Bag`).
 
 **Justificativa:**
-
-Uma matriz de adjacência tradicional exigiria um vetor/matriz indexado por número de andar, o que é inviável, já que os andares chegam a $10^9$ — resultaria em estouro de memória (*Memory Limit Exceeded*), pois a matriz teria dimensão $10^9 \times 10^9$.
-
-A lista de adjacência é a estrutura adequada, pois o grafo é **esparso**: com $N \le 2\times10^5$ escadas, existem no máximo $|V| \le 2N+1 \le 4\times10^5+1$ andares distintos relevantes, e o restante dos $10^9$ andares nunca é visitado nem armazenado.
-
-Optou-se por usar o **próprio número do andar como chave do dicionário** (`defaultdict(list)`), em vez de aplicar uma compressão de coordenadas para índices sequenciais $0..|V|-1$. O dicionário (tabela hash) já resolve o problema de esparsidade nativamente — apenas os andares que efetivamente aparecem na entrada (mais o andar 1) ocupam memória — e essa abordagem simplifica a leitura e a validação, já que os vértices no código continuam sendo identificados pelo mesmo valor apresentado no enunciado, sem necessidade de tradução entre índice comprimido e andar original.
-
-Essa estrutura garante complexidade espacial e temporal $O(V + E)$, adequada para as buscas DFS/BFS que serão realizadas nos Marcos 3 e 4.
+Uma matriz de adjacência exigiria uma estrutura indexada pelo número do andar. Como os andares chegam a 10^9, isso resultaria em um estouro de memória (Memory Limit Exceeded). A solução é usar a **compressão de coordenadas**: um dicionário interno (tabela de símbolos) mapeia apenas os andares que aparecem na entrada para índices contínuos (de 0 até V-1). 
+Após essa conversão, o grafo é instanciado usando vetores de listas encadeadas (`Bag`), o que resolve a esparsidade, garante consumo de memória proporcional apenas aos andares utilizados e mantém a complexidade de tempo em O(V + E), viabilizando o reuso direto dos algoritmos de busca e oráculos da biblioteca `algs4`.
 
 ---
 
 ## 2. Leitura da Entrada e Construção do Grafo
 
 **Processo de Construção:**
-
-1. A entrada é lida e convertida diretamente em um **`numpy.array`** de shape $(N, 2)$ e `dtype=np.int64`
-2. Para cada linha `[A_i, B_i]` do array (cada escada), a aresta é inserida **simetricamente** no dicionário de adjacência,refletindo que o grafo é **não direcionado**.
-3. A presença do **andar 1** no dicionário é garantida por meio de um acesso explícito, isso assegura que o vértice de partida sempre exista na estrutura, mesmo que ele não apareça em nenhuma escada (caso do Sample 3 do Marco 1, cuja resposta é 1).
-
----
+1. A entrada é lida e convertida em um `numpy.array` matricial de shape (N, 2).
+2. A classe `LadderSymbolGraph` itera sobre essa matriz. Se um andar ainda não possui índice, ele recebe o próximo ID sequencial disponível, salvo em um dicionário interno. O andar 1 é inserido forçadamente para garantir que a origem exista no grafo computacional.
+3. Com o total de vértices distintos descoberto, a instância `algs4.graph.Graph` é inicializada.
+4. O array é iterado novamente: para cada par (A, B) lido, a classe recupera os índices comprimidos (ex: u, v) e adiciona a aresta simetricamente, respeitando a natureza não direcionada do problema.
 
 ## 3. Medidas Estruturais (Unidade I)
 
