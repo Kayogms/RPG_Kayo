@@ -139,7 +139,9 @@ Adicionalmente, foi realizado um **teste de estresse** com $N = 2\times10^5$ esc
 
 ## 7. Submissão
 
-O código integrado com a BFS foi submetido na plataforma **AtCoder** e recebeu o veredito **`Accepted`** (evidência salva na pasta `evidencias/accepted.png`).
+O código integrado com a BFS foi submetido na plataforma **AtCoder** e recebeu o veredito **`Accepted`**, comprovando a eficácia e a segurança da abordagem iterativa adotada.
+
+![Evidência do Accepted AtCoder](../evidencias/Evidencia_1.png)
 
 **Código de submissão final (`marco4_bfs.py` — `resolver_para_submissao`):**
 
