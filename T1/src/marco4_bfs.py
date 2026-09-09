@@ -112,7 +112,7 @@ def main_desenvolvimento():
     edges = LeitorEntrada.ler()
     sg = LadderSymbolGraph(edges, vertice_partida=1)
 
-    validar_estrutura(sg)
+    #validar_estrutura(sg)
     print()
 
     maior_dfs = ValidadorDFS.validar(sg, edges, origem=1)
