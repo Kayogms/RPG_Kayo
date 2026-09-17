@@ -4,114 +4,113 @@
 
 ### Histórico de Versões
 
-| Versão | Data       | Descrição das Alterações                                                                        | Grupo |
+| Versão | Data | Descrição das Alterações | Grupo |
 |:-------|:-----------|:------------------------------------------------------------------------------------------------|:------|
 | 1.0    | 16/09/2026 | Criação do documento, modelagem inicial e adaptação estrutural para o problema de emparelhamento | E     |
+| 1.1    | 17/09/2026 | Simplificação do documento; unificação de seções redundantes; avaliação de reaproveitamento das classes de referência do professor na hipótese de solução | E |
 
 ---
 
 ## 1. Enunciado, Entrada, Saída e Restrições
 
-### Resumo do Problema
+**Enunciado:**
 
-#### Enunciado
-Marek e seus colegas terminaram a universidade e decidiram celebrar com uma partida de paintball. Após uma hora de jogo, uma situação peculiar ocorreu: cada jogador possui exatamente uma bala restante.
+Marek e seus colegas terminaram a universidade e decidiram celebrar com uma partida de paintball. Após o jogo, cada jogador possui exatamente uma bala restante. Marek quer saber se é possível que **todos os jogadores sejam atingidos exatamente uma vez**, considerando que ninguém pode se mover, dado quem consegue ver quem (e, portanto, quem pode atirar em quem).
 
-Marek quer saber se é possível que **todos os jogadores sejam atingidos exatamente uma vez**, considerando que ninguém pode se mover. É dada a descrição de quais jogadores conseguem se ver. Se um jogador consegue ver outro, ele pode atirar nele. O objetivo é encontrar um alvo para cada jogador de modo que a condição seja satisfeita.
+**Entrada:**
 
-#### Entrada
-A entrada consiste em dois números inteiros separados por espaço, **N** e **M**, onde **N** é o número de jogadores. Os jogadores são numerados de 1 a **N**. Em seguida, há **M** linhas, cada uma contendo dois inteiros separados por espaço, **u** e **v**, indicando que os jogadores **u** e **v** conseguem se ver mutuamente. Cada par aparece no máximo uma vez na entrada.
+```
+N M
+u1 v1
+u2 v2
+...
+uM vM
+```
 
-#### Saída
-Se não houver uma atribuição de alvos tal que todos sejam atingidos, o programa deve imprimir `Impossible`. Caso contrário, deve imprimir **N** linhas. A i-ésima linha deve conter o número do alvo do i-ésimo jogador. Se houver mais de uma solução, qualquer uma é válida.
+- $N$ = número de jogadores (numerados de 1 a $N$); $M$ = número de pares que se enxergam mutuamente.
+- Cada uma das $M$ linhas seguintes contém um par $(u, v)$ que se enxerga.
 
-#### Restrições
-* **N** (número de jogadores): 2 a 1000.
-* **M** (número de linhas de visão): 0 a 5000.
-* **u**, **v**: 1 a **N** (com **u** diferente de **v**).
-* Cada jogador atira exatamente 1 vez e recebe exatamente 1 tiro.
+**Saída:**
 
-#### Observações Importantes
-O problema requer que se resuma a entrada, saída e restrições. Este é um problema clássico cuja solução exige a aplicação de conhecimentos estruturais da Unidade II, sendo classificado como um desafio avançado (Problema I*).
-* Como cada jogador precisa de um alvo único e exclusivo, o problema trata-se fundamentalmente de encontrar um **Emparelhamento Perfeito** (Bipartite Matching).
-* A validação será se conseguimos formar **N** pares únicos entre "atiradores" e "alvos".
+- `Impossible`, se não houver atribuição de alvos em que todos sejam atingidos.
+- Caso contrário, $N$ linhas: a linha $i$ contém o alvo escolhido pelo jogador $i$. Havendo mais de uma solução, qualquer uma é aceita.
+
+**Restrições:**
+
+- $2 \le N \le 1\,000$
+- $0 \le M \le 5\,000$
+- $1 \le u, v \le N$, com $u \ne v$; cada par aparece no máximo uma vez.
+
+**Observação central:** como cada jogador precisa de exatamente um alvo, e cada jogador precisa ser alvo de exatamente uma pessoa, o problema é, no fundo, encontrar um **Emparelhamento Perfeito** (*Bipartite Perfect Matching*) — não uma propriedade de alcançabilidade ou conectividade simples.
 
 ---
 
-## 2. Vértices, Arestas e Tipo do Grafo
+## 2. Vértices, Arestas e Tipo de Grafo
 
-A modelagem de vértices e arestas e a classificação do grafo são requisitos obrigatórios do Marco 1.
+**Modelagem:** para transformar "cada jogador escolhe um alvo, e cada jogador é alvo de exatamente um atirador" em um problema de emparelhamento, cada jogador é dividido em duas cópias, formando um grafo bipartido:
 
-### Vértices (V)
-A modelagem divide conceitualmente os jogadores em dois conjuntos independentes para formar um grafo bipartido:
-* **Conjunto A (Atiradores):** Vértices representando os jogadores no momento de atirar.
-* **Conjunto B (Alvos):** Vértices representando os mesmos jogadores no momento de receber o tiro.
-* Logo, total de vértices = 2**N** (máximo de 2000).
+- **Vértices ($V$):** conjunto $A$ (jogadores como *atiradores*) $\cup$ conjunto $B$ (jogadores como *alvos*). $|V| = 2N$ (até 2.000).
+- **Arestas ($E$):** para cada par de visibilidade $(x, y)$ da entrada — que é mútuo — criam-se duas possibilidades de tiro: $x \to y$ (aresta $x_A \to y_B$) e $y \to x$ (aresta $y_A \to x_B$). $|E| = 2M$ (até 10.000).
+- **Tipo de grafo:** bipartido (arcos só de $A$ para $B$), não ponderado, simples (sem laços nem arestas paralelas).
 
-### Arestas (E)
-Cada **aresta** representa a linha de visão. Como a visão é mútua na entrada original, para cada par (x, y), adicionamos as possibilidades de tiro:
-* O jogador x (atirador) pode atirar em y (alvo).
-* O jogador y (atirador) pode atirar em x (alvo).
-* Total de arestas = 2**M** (máximo de 10000).
-
-### Tipo de Grafo
-O grafo original de visão é não direcionado, mas modelaremos o problema transformando-o em um:
-* **Grafo Bipartido Direcionado:** As conexões vão exclusivamente do Conjunto A (Atiradores) para o Conjunto B (Alvos).
-* **Não ponderado:** Todas as linhas de visão têm o mesmo peso.
-* **Simples:** Sem laços ou arestas paralelas.
-
-### Relação com o Problema e Resultado de Aprendizagem
-O resultado de aprendizagem aferido é a identificação e resolução de emparelhamentos. O objetivo se resume a:
-1. Construir o grafo bipartido conectando Atiradores e Alvos.
-2. Encontrar o **Emparelhamento Máximo** neste grafo.
-3. Se o tamanho do emparelhamento for igual a **N**, todos atiram e todos são atingidos (emparelhamento perfeito). Retornar os pares. Caso contrário, retornar `Impossible`.
+**Relação com o problema:** encontrar o alvo de cada jogador equivale a encontrar um **Emparelhamento Máximo** neste grafo bipartido. Se o tamanho do emparelhamento for igual a $N$ (emparelhamento perfeito), todos atiram e todos são atingidos — a resposta é a atribuição correspondente. Caso contrário, a resposta é `Impossible`.
 
 ---
 
 ## 3. Instância Pequena e Resultado Esperado
 
-A criação de uma instância pequena é exigida pelo Marco 1.
+**Caso de teste (ciclo de 4 jogadores):**
 
-**Caso de Teste Escolhido (Ciclo de 4 Jogadores):**
+```
+4 4
+1 2
+2 3
+3 4
+4 1
+```
 
-    4 4
-    1 2
-    2 3
-    3 4
-    4 1
+**Matriz de adjacência bipartida (atiradores nas linhas, alvos nas colunas):**
 
-**Matriz de Adjacência Bipartida (Atiradores nas linhas, Alvos nas colunas):**
+| | Alvo 1 | Alvo 2 | Alvo 3 | Alvo 4 |
+|:---|:---:|:---:|:---:|:---:|
+| **Atirador 1** | 0 | 1 | 0 | 1 |
+| **Atirador 2** | 1 | 0 | 1 | 0 |
+| **Atirador 3** | 0 | 1 | 0 | 1 |
+| **Atirador 4** | 1 | 0 | 1 | 0 |
 
-| -              | **Alvo 1** | **Alvo 2** | **Alvo 3** | **Alvo 4** |
-|:---------------|:----------:|:----------:|:----------:|:----------:|
-| **Atirador 1** |     0      |     1      |     0      |     1      |
-| **Atirador 2** |     1      |     0      |     1      |     0      |
-| **Atirador 3** |     0      |     1      |     0      |     1      |
-| **Atirador 4** |     1      |     0      |     1      |     0      |
+**Resultado esperado:**
 
-**Resultado Esperado:**
+```
+2
+3
+4
+1
+```
 
-    2
-    3
-    4
-    1
-
-**Explicação (Rastreio manual básico):**
-O jogador 1 atira no 2. O jogador 2 atira no 3. O jogador 3 atira no 4. O jogador 4 atira no 1. Todos os 4 atiraram exatamente uma vez e receberam exatamente um tiro, satisfazendo a condição sem que ninguém ficasse de fora.
+**Explicação:** o jogador 1 atira no 2, o 2 no 3, o 3 no 4, e o 4 no 1 — um ciclo de tamanho 4. Todos atiram exatamente uma vez e são atingidos exatamente uma vez, satisfazendo a condição do enunciado.
 
 ---
 
 ## 4. Hipótese Inicial de Solução
 
-O grupo deve indicar como a DFS/BFS participa da solução neste marco.
+**Estratégia de resolução:** o emparelhamento máximo em grafo bipartido é resolvido pelo **Algoritmo de Kuhn**, que usa DFS para buscar **caminhos aumentantes**:
 
-**Estratégia de Resolução:**
+1. Para cada atirador ainda sem alvo, tenta-se uma DFS entre seus vizinhos (alvos que ele enxerga).
+2. Se um alvo estiver livre, o emparelhamento é feito imediatamente.
+3. Se o alvo já estiver ocupado por outro atirador, a DFS tenta **realocar recursivamente** esse atirador anterior para um alvo alternativo, liberando espaço para o atual.
+4. Se todos os $N$ atiradores forem emparelhados, imprime-se a atribuição; senão, `Impossible`.
 
-1. **Construção:** Ler as entradas e montar uma lista de adjacência modelando o grafo bipartido (cada atirador aponta para os alvos que consegue ver).
-2. **Execução Principal (Busca de Caminhos Aumentantes):** O problema de emparelhamento em grafos bipartidos pode ser resolvido utilizando a DFS para encontrar caminhos aumentantes (ex: Algoritmo de Kuhn).
-3. **Papel da Busca (DFS):** A DFS participa da solução iterando sobre cada atirador e tentando atribuir-lhe um alvo. Se o alvo desejado estiver livre, o emparelhamento é feito. Se o alvo já estiver atribuído a um atirador anterior, a DFS entra recursivamente para verificar se o atirador anterior pode ser realocado para um alvo diferente, liberando espaço para o atual.
-4. **Validação e Retorno:**
-   * Se o algoritmo conseguir emparelhar todos os **N** jogadores, imprimimos o alvo associado a cada um.
-   * Se o loop terminar e o total de pares formados for menor que **N**, a saída é imediata: `Impossible`.
+**Complexidade esperada:** $O(V \cdot E)$ — com $V \le 2000$ e $E \le 10\,000$, o pior caso fica na casa dos milhões de operações, dentro do limite de tempo padrão.
 
-**Complexidade esperada da solução:** O Algoritmo de Kuhn utilizando DFS possui complexidade $O(V \cdot E)$. Como os vértices chegam a 2000 e arestas a 10000, o número de operações no pior caso fica na casa dos milhões, o que é processado rapidamente e garantirá o `Accepted` nas restrições de tempo padrão.
+### Avaliação do reaproveitamento das classes de referência do professor
+
+Nem toda classe do pacote `algs4` se aplica diretamente aqui — vale registrar essa avaliação explicitamente, já que o Algoritmo de Kuhn não é uma das buscas "prontas" da Unidade I:
+
+| Classe do professor | Reaproveitável neste problema? | Justificativa |
+|---|---|---|
+| `Graph` (`algs4.graph.Graph`) | **Sim, com ressalva.** | Pode representar o grafo bipartido: `Graph(2N)`, indexando atiradores em `0..N-1` e alvos em `N..2N-1`, com `add_edge` para cada visibilidade. Ressalva: por ser pensada para grafos **não direcionados**, `add_edge` registra a aresta nos dois sentidos — inclusive de alvo para atirador, sentido que o algoritmo de Kuhn nunca percorre. Isso não quebra a lógica (o excesso de arestas simplesmente não é usado), mas é preciso documentar essa diferença de uso pretendido vs. real. |
+| `Bag` (`algs4.bag.Bag`) | **Sim.** | É a estrutura interna de `Graph`, reaproveitada automaticamente junto com ela. |
+| `DepthFirstPaths` (`algs4.depth_first_paths.DepthFirstPaths`) | **Não diretamente — precisa de reformulação, não apenas adaptação pontual.** | A DFS de referência resolve "quem é alcançável a partir de uma única origem fixa" com um `marked[]` **global e permanente**. O Algoritmo de Kuhn precisa de algo estruturalmente diferente: (1) o vetor de "visitados" deve ser **reiniciado a cada novo atirador tentado** (não é uma única busca global); (2) a recursão não decide "para onde ir" olhando só quem não foi visitado — ela decide se **vale a pena desalocar** o emparelhamento atual de um alvo ocupado; (3) a função precisa **retornar sucesso/falha** (booleano), algo que `has_path_to` não faz durante a busca, só depois de pronta. Por isso, a implementação usará o mesmo *padrão* recursivo com `marked[]` como base conceitual, mas a lógica de decisão dentro da recursão será escrita do zero para este problema. |
+| `BreadthFirstPaths`, `UF`, `CC` | **Não aplicável.** | Resolvem alcançabilidade por níveis, conectividade e componentes conexas — nenhuma dessas perguntas corresponde ao que o problema exige (emparelhamento exclusivo, não alcançabilidade nem agrupamento). |
+
+**Conclusão da avaliação:** `Graph`/`Bag` serão reaproveitadas como estrutura de dados do grafo bipartido. A busca em si (Algoritmo de Kuhn) será uma implementação nova, que se inspira no padrão recursivo de marcação da `DepthFirstPaths`, mas não é uma adaptação incremental dela — a lógica de decisão da recursão é fundamentalmente outra. Essa distinção será detalhada e implementada no Marco 2/3, quando o critério algorítmico completo for formalizado.
