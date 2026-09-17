@@ -49,11 +49,13 @@ uM vM
 
 **Modelagem:** para transformar "cada jogador escolhe um alvo, e cada jogador é alvo de exatamente um atirador" em um problema de emparelhamento, cada jogador é dividido em duas cópias, formando um grafo bipartido:
 
-- **Vértices ($V$):** conjunto $A$ (jogadores como *atiradores*) $\cup$ conjunto $B$ (jogadores como *alvos*). $|V| = 2N$ (até 2.000).
-- **Arestas ($E$):** para cada par de visibilidade $(x, y)$ da entrada — que é mútuo — criam-se duas possibilidades de tiro: $x \to y$ (aresta $x_A \to y_B$) e $y \to x$ (aresta $y_A \to x_B$). $|E| = 2M$ (até 10.000).
+- **Vértices ($V$):** conjunto $A$ (jogadores como *atiradores*) $\cup$ conjunto $B$ (jogadores como *alvos*). $\vert{}V\vert{} = 2N$ (até 2.000).
+- **Arestas ($E$):** para cada par de visibilidade $(x, y)$ da entrada — que é mútuo — criam-se duas possibilidades de tiro: $x \to y$ (aresta $x_A \to y_B$) e $y \to x$ (aresta $y_A \to x_B$). $\vert{}E\vert{} = 2M$ (até 10.000).
 - **Tipo de grafo:** bipartido (arcos só de $A$ para $B$), não ponderado, simples (sem laços nem arestas paralelas).
 
 **Relação com o problema:** encontrar o alvo de cada jogador equivale a encontrar um **Emparelhamento Máximo** neste grafo bipartido. Se o tamanho do emparelhamento for igual a $N$ (emparelhamento perfeito), todos atiram e todos são atingidos — a resposta é a atribuição correspondente. Caso contrário, a resposta é `Impossible`.
+
+**Resultado de aprendizagem aferido:** A resolução deste problema afere a capacidade de identificar, modelar e calcular **Emparelhamentos** (*Bipartite Matching*), aplicando conhecimentos estruturais avançados para estabelecer uma correspondência exclusiva entre dois conjuntos independentes.
 
 ---
 
@@ -93,24 +95,18 @@ uM vM
 
 ## 4. Hipótese Inicial de Solução
 
-**Estratégia de resolução:** o emparelhamento máximo em grafo bipartido é resolvido pelo **Algoritmo de Kuhn**, que usa DFS para buscar **caminhos aumentantes**:
+**Estratégia de Resolução Conceptual:**
+Para resolver o problema de alocação exclusiva (onde cada atirador precisa de um alvo único e cada alvo só pode ser atingido por um atirador), a solução modelará o cenário como a busca por um **Emparelhamento Máximo em um Grafo Bipartido**. A estratégia central será utilizar o **Algoritmo de Kuhn**.
 
-1. Para cada atirador ainda sem alvo, tenta-se uma DFS entre seus vizinhos (alvos que ele enxerga).
-2. Se um alvo estiver livre, o emparelhamento é feito imediatamente.
-3. Se o alvo já estiver ocupado por outro atirador, a DFS tenta **realocar recursivamente** esse atirador anterior para um alvo alternativo, liberando espaço para o atual.
-4. Se todos os $N$ atiradores forem emparelhados, imprime-se a atribuição; senão, `Impossible`.
+**O Papel da DFS (Busca de Caminhos Aumentantes):**
+A Busca em Profundidade (DFS) atuará como o motor lógico para encontrar "caminhos aumentantes". O algoritmo iterará sobre cada atirador tentando associá-lo a um alvo. 
+- Se o alvo desejado estiver livre, o emparelhamento é estabelecido imediatamente.
+- Se o alvo desejado já estiver ocupado por outro jogador, a DFS fará uma exploração recursiva. Ela verificará se o atirador "dono" atual desse alvo pode ser realocado para um alvo alternativo que esteja livre (ou cujo dono também possa ser realocado). Esse processo de "desalocar e realocar" em cascata é o que permite aumentar o tamanho do emparelhamento iterativamente.
 
-**Complexidade esperada:** $O(V \cdot E)$ — com $V \le 2000$ e $E \le 10\,000$, o pior caso fica na casa dos milhões de operações, dentro do limite de tempo padrão.
+**Validação e Retorno:**
+Ao final da execução para todos os atiradores, se o total de pareamentos bem-sucedidos for exatamente igual a $N$, alcançamos um Emparelhamento Perfeito. Imprimimos a atribuição resultante. Caso contrário, concluímos que é inviável e imprimimos `Impossible`.
 
-### Avaliação do reaproveitamento das classes de referência do professor
-
-Nem toda classe do pacote `algs4` se aplica diretamente aqui — vale registrar essa avaliação explicitamente, já que o Algoritmo de Kuhn não é uma das buscas "prontas" da Unidade I:
-
-| Classe do professor | Reaproveitável neste problema? | Justificativa |
-|---|---|---|
-| `Graph` (`algs4.graph.Graph`) | **Sim, com ressalva.** | Pode representar o grafo bipartido: `Graph(2N)`, indexando atiradores em `0..N-1` e alvos em `N..2N-1`, com `add_edge` para cada visibilidade. Ressalva: por ser pensada para grafos **não direcionados**, `add_edge` registra a aresta nos dois sentidos — inclusive de alvo para atirador, sentido que o algoritmo de Kuhn nunca percorre. Isso não quebra a lógica (o excesso de arestas simplesmente não é usado), mas é preciso documentar essa diferença de uso pretendido vs. real. |
-| `Bag` (`algs4.bag.Bag`) | **Sim.** | É a estrutura interna de `Graph`, reaproveitada automaticamente junto com ela. |
-| `DepthFirstPaths` (`algs4.depth_first_paths.DepthFirstPaths`) | **Não diretamente — precisa de reformulação, não apenas adaptação pontual.** | A DFS de referência resolve "quem é alcançável a partir de uma única origem fixa" com um `marked[]` **global e permanente**. O Algoritmo de Kuhn precisa de algo estruturalmente diferente: (1) o vetor de "visitados" deve ser **reiniciado a cada novo atirador tentado** (não é uma única busca global); (2) a recursão não decide "para onde ir" olhando só quem não foi visitado — ela decide se **vale a pena desalocar** o emparelhamento atual de um alvo ocupado; (3) a função precisa **retornar sucesso/falha** (booleano), algo que `has_path_to` não faz durante a busca, só depois de pronta. Por isso, a implementação usará o mesmo *padrão* recursivo com `marked[]` como base conceitual, mas a lógica de decisão dentro da recursão será escrita do zero para este problema. |
-| `BreadthFirstPaths`, `UF`, `CC` | **Não aplicável.** | Resolvem alcançabilidade por níveis, conectividade e componentes conexas — nenhuma dessas perguntas corresponde ao que o problema exige (emparelhamento exclusivo, não alcançabilidade nem agrupamento). |
+**Complexidade Esperada:**
+O Algoritmo de Kuhn utilizando DFS possui complexidade de tempo no pior caso de $O(V \cdot E)$. Como teremos $\vert{}V\vert{} \le 2000$ e $\vert{}E\vert{} \le 10000$, o número máximo de operações fica na casa dos milhões. Essa abordagem algorítmica é altamente eficiente e garante que a execução ocorrerá com folga dentro do limite de tempo da plataforma.
 
 **Conclusão da avaliação:** `Graph`/`Bag` serão reaproveitadas como estrutura de dados do grafo bipartido. A busca em si (Algoritmo de Kuhn) será uma implementação nova, que se inspira no padrão recursivo de marcação da `DepthFirstPaths`, mas não é uma adaptação incremental dela — a lógica de decisão da recursão é fundamentalmente outra. Essa distinção será detalhada e implementada no Marco 2/3, quando o critério algorítmico completo for formalizado.
