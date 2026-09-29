@@ -1,88 +1,92 @@
-# Marco 2 — Representação Computacional: Ladder Takahashi (Problema I)
+# Marco 2 — Propriedade Estrutural: Kattis Paintball (Problema I)
 
-**Data de Criação:** 15/08/2026
+**Data de Criação:** 28/09/2026
 
 ### Histórico de Versões
 
-| Versão | Data       | Descrição das Alterações               | Grupo |
-| :------ | :--------- | :----------------------------------------- | :---- |
-| 1.0     | 15/08/2026 | Criação do documento e estrutura inicial | F     |
-| 1.1     | 17/08/2026 | Simplificação                            | F     |
+| Versão | Data | Descrição das Alterações | Grupo |
+|:-------|:-----------|:-----------|:------|
+| 2.0 | 28/09/2026 | Criação do documento: definição estrutural, estados da busca e teste de mesa do critério | E |
+| 2.1 | 28/09/2026 | Execução manual refeita sobre a instância do Marco 1 (rastreabilidade entre marcos); instância de 6 jogadores mantida como evidência complementar do efeito cascata; descrições dos estados reescritas em linguagem concreta, sem notação de código | E |
 
 ---
 
-## 1. Escolha da Representação Computacional
+## 1. Propriedade Exigida pelo Problema
 
-**Estrutura de Dados Selecionada:**
-Tabela de símbolos para compressão de coordenadas (`LadderSymbolGraph`) combinada com uma Lista de Adjacência nativa (`algs4.graph.Graph`, baseada em arrays de `algs4.bag.Bag`).
+A propriedade estrutural central exigida pelo Kattis Paintball é o **Emparelhamento Perfeito** (*Perfect Bipartite Matching*).
 
-**Justificativa:**
-Uma matriz de adjacência exigiria uma estrutura indexada pelo número do andar. Como os andares chegam a 10^9, isso resultaria em um estouro de memória (Memory Limit Exceeded). A solução é usar a **compressão de coordenadas**: um dicionário interno (tabela de símbolos) mapeia apenas os andares que aparecem na entrada para índices contínuos (de 0 até V-1). 
-Após essa conversão, o grafo é instanciado usando vetores de listas encadeadas (`Bag`), o que resolve a esparsidade, garante consumo de memória proporcional apenas aos andares utilizados e mantém a complexidade de tempo em O(V + E), viabilizando o reuso direto dos algoritmos de busca e oráculos da biblioteca `algs4`.
+Um emparelhamento em um grafo é um subconjunto de arestas que não compartilham vértices entre si — ou seja, nenhum vértice participa de mais de uma aresta escolhida. O problema exige que todos os jogadores atirem e sejam atingidos exatamente uma vez. No modelo de grafo bipartido definido no Marco 1 (conjunto $A$ = atiradores, conjunto $B$ = alvos), isso significa encontrar um emparelhamento de tamanho exatamente $N$, cobrindo simultaneamente todos os vértices de $A$ e todos os vértices de $B$, cada um em exatamente uma aresta.
 
 ---
 
-## 2. Leitura da Entrada e Construção do Grafo
+## 2. Critério Algorítmico
 
-**Processo de Construção:**
-1. A entrada é lida e convertida em um `numpy.array` matricial de shape (N, 2).
-2. A classe `LadderSymbolGraph` itera sobre essa matriz. Se um andar ainda não possui índice, ele recebe o próximo ID sequencial disponível, salvo em um dicionário interno. O andar 1 é inserido forçadamente para garantir que a origem exista no grafo computacional.
-3. Com o total de vértices distintos descoberto, a instância `algs4.graph.Graph` é inicializada.
-4. O array é iterado novamente: para cada par (A, B) lido, a classe recupera os índices comprimidos (ex: u, v) e adiciona a aresta simetricamente, respeitando a natureza não direcionada do problema.
+O critério usado para reconhecer o emparelhamento perfeito vem da teoria de Berge sobre **caminhos aumentantes**, aplicada computacionalmente pelo Algoritmo de Kuhn.
 
-## 3. Medidas Estruturais (Unidade I)
+**Critério-chave:** um emparelhamento é máximo se, e somente se, não existir nenhum caminho aumentante no grafo.
 
-**Análise do Grafo Construído (referente ao Sample 1):**
+**Caminho aumentante:** um caminho que começa em um atirador ainda sem alvo, alterna entre arestas fora do emparelhamento atual e arestas dentro dele, e termina em um alvo totalmente livre.
 
-- **Número total de vértices instanciados ($|V|$):** 5 andares distintos foram instanciados no dicionário: $\{1, 3, 4, 8, 10\}$.
-- **Número de arestas lidas ($|E|$):** 4 escadas foram lidas da entrada, correspondendo a $|E| = 4$ arestas no grafo.
-- **Grau dos vértices ($d(v)$):**
-
-| Andar (vértice) | Grau$d(v)$ | Vizinhos   |
-| :--------------: | :----------: | :--------- |
-|        1        |      1      | [4]        |
-|        3        |      2      | [4, 8]     |
-|        4        |      3      | [1, 3, 10] |
-|        8        |      1      | [3]        |
-|        10        |      1      | [4]        |
-
-O andar **4** possui o **grau máximo** ($d(4) = 3$), sendo o andar com mais conexões diretas — condizente com o fato de ele ser o "andar-hub" que liga o ponto de partida (andar 1) aos andares 3 e 10.
-
-O **andar 1** (ponto de partida de Takahashi) possui **grau 1**, conectando-se apenas ao andar 4.
-
-Essas medidas confirmam a teoria apresentada no Marco 1 (Seção 2): o grafo é esparso, não direcionado, com $|V| \le 2N+1$ e $|E| = N$, consistente com os valores obtidos ($|V|=5 \le 2(4)+1=9$ e $|E|=4=N$).
+**Efeito de encontrar um caminho aumentante:** ao percorrê-lo, o status de cada aresta do caminho é invertido — o que não estava emparelhado passa a estar, e vice-versa. O tamanho total do emparelhamento cresce em exatamente 1 a cada caminho aumentante encontrado. O processo se repete para cada atirador, até que todos estejam emparelhados (emparelhamento perfeito) ou até que sobre algum atirador sem nenhum caminho aumentante disponível (caso em que a resposta é `Impossible`).
 
 ---
 
-## 4. Validação da Representação (Instância Pequena)
+## 3. Estado Adicional à Busca
 
-**Entrada do Sample 1:**
+Além da marcação de visitados de uma busca convencional, o critério exige manter duas informações adicionais durante a execução:
 
-```text
-4
-1 4
-4 3
-4 10
-8 3
-```
+| Estado | O que representa | Comportamento |
+|---|---|---|
+| **Registro de correspondência atual** | Para cada alvo, qual atirador está emparelhado com ele no momento — a "foto" do emparelhamento em construção. | Permanece entre as tentativas de diferentes atiradores; só é atualizado quando um caminho aumentante é efetivamente concluído. |
+| **Controle de visita temporário** | Quais alvos já foram considerados durante a tentativa do atirador atual. | É reiniciado a cada novo atirador, diferente da marcação permanente de uma busca de alcançabilidade tradicional — sua única função é impedir que a busca reconsidere o mesmo alvo mais de uma vez dentro da mesma tentativa, evitando ciclos. |
 
-**Estado Final da Memória (Lista de Adjacência Gerada):**
+A diferença central em relação a uma busca de alcançabilidade comum está no papel do registro de correspondência: a busca não apenas verifica se um alvo está livre, mas, ao encontrá-lo ocupado, tenta **deslocar** o atirador atualmente correspondente a esse alvo para outra opção, repetindo o processo recursivamente até esgotar as alternativas ou concluir o caminho aumentante.
 
-```python
-{
-  1: [4],
-  4: [1, 3, 10],
-  3: [4, 8],
-  10: [4],
-  8: [3]
-}
-```
+---
 
-A saída real do programa confirma que:
+## 4. Execução Manual na Instância do Marco 1
 
-- O andar 1 está corretamente conectado ao andar 4.
-- O andar 4 concentra as três conexões esperadas (1, 3 e 10), refletindo o grau máximo identificado na Seção 3.
-- O andar 3 conecta-se a 4 e a 8, e o andar 8 conecta-se de volta a 3 — validando a **bidirecionalidade** das arestas (grafo não direcionado).
-- O andar 10 conecta-se apenas a 4, sendo uma folha do componente.
+Para manter a rastreabilidade com o marco anterior, a execução abaixo usa a mesma instância pequena definida no Marco 1: 4 jogadores, com visibilidade em ciclo (1–2, 2–3, 3–4, 4–1).
 
-Essa estrutura é **idêntica** à relação de adjacência descrita pela matriz de incidência apresentada no Marco 1 (Seção 3), confirmando que a representação computacional construída neste marco é fiel à modelagem teórica definida anteriormente.
+**Correspondência inicial:** nenhum alvo ocupado.
+
+| Atirador | Tentativa | Situação encontrada | Ação |
+|:---:|:---:|:---|:---|
+| 1 | alvo 2 | livre | assume o alvo 2 |
+| 2 | alvo 1 | livre | assume o alvo 1 |
+| 3 | alvo 2 | ocupado (atirador 1) | tenta deslocar o atirador 1 → alvo 4, que está livre → atirador 1 passa para o alvo 4; alvo 2 fica livre para o atirador 3 |
+| 4 | alvo 3 | livre | assume o alvo 3 |
+
+**Correspondência final:** atirador 2 → alvo 1; atirador 3 → alvo 2; atirador 4 → alvo 3; atirador 1 → alvo 4.
+
+Todos os 4 atiradores foram emparelhados — emparelhamento perfeito confirmado. Esta atribuição é diferente, jogador a jogador, da apresentada como exemplo no Marco 1 (que tinha atirador 1 → alvo 2, formando o ciclo no sentido oposto), mas ambas são igualmente válidas: o enunciado aceita qualquer atribuição em que todos sejam atingidos exatamente uma vez, e a diferença aqui decorre apenas da ordem em que os alvos de cada atirador foram considerados durante a busca.
+
+---
+
+## 5. Instância Complementar: Efeito Cascata em Múltiplos Níveis
+
+A instância do Marco 1 demonstra um deslocamento de um único nível (Seção 4, atirador 3). Para evidenciar como o deslocamento pode se propagar em cadeia por vários atiradores antes de concluir um caminho aumentante, apresenta-se uma segunda instância, com 6 jogadores:
+
+- Atirador 1 vê os alvos 2 e 3.
+- Atirador 2 vê os alvos 1, 3 e 4.
+- Atirador 3 vê os alvos 1, 2 e 4.
+- Atirador 4 vê os alvos 2 e 3.
+- Atirador 5 vê o alvo 6.
+- Atirador 6 vê o alvo 5.
+
+**Correspondência inicial:** nenhum alvo ocupado.
+
+| Atirador | Tentativas em cadeia | Resultado |
+|:---:|:---|:---|
+| 1 | alvo 2: livre → assume | atirador 1 → alvo 2 |
+| 2 | alvo 1: livre → assume | atirador 2 → alvo 1 |
+| 3 | alvo 1: ocupado (atirador 2) → desloca atirador 2 → alvo 3: livre → atirador 2 assume o alvo 3 | atirador 3 → alvo 1; atirador 2 → alvo 3 |
+| 4 | alvo 2: ocupado (atirador 1) → desloca atirador 1 → alvo 3: ocupado (atirador 2) → desloca atirador 2 → alvo 1: ocupado (atirador 3) → desloca atirador 3 → alvo 4: livre → atirador 3 assume o alvo 4; em cadeia, atirador 2 assume o alvo 1; atirador 1 assume o alvo 3; atirador 4 assume o alvo 2 | atirador 4 → alvo 2; atirador 1 → alvo 3; atirador 2 → alvo 1; atirador 3 → alvo 4 |
+| 5 | alvo 6: livre → assume | atirador 5 → alvo 6 |
+| 6 | alvo 5: livre → assume | atirador 6 → alvo 5 |
+
+**Correspondência final:** atirador 1 → alvo 3; atirador 2 → alvo 1; atirador 3 → alvo 4; atirador 4 → alvo 2; atirador 5 → alvo 6; atirador 6 → alvo 5.
+
+O passo do atirador 4 é o ponto central desta instância: uma única tentativa percorre uma cadeia de três deslocamentos (atiradores 1, 2 e 3, nessa ordem) antes de alcançar um alvo livre, ilustrando por que a complexidade do algoritmo é proporcional ao número de arestas percorridas em cada tentativa, e não apenas ao número de atiradores.
+
+Vale notar, ainda, que os atiradores 5 e 6 formam um par isolado do restante do grafo (só se enxergam entre si): mesmo com dependências profundas no restante da instância, esse par é resolvido de forma independente, sem qualquer interação com as cadeias de deslocamento dos atiradores 1 a 4 — confirmando que o algoritmo trata corretamente componentes desconexos do grafo de visibilidade.
