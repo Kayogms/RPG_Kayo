@@ -1,15 +1,15 @@
-# RPG_Kayo
+# RPG_Kayo - Trabalho Prático 2 (T2)
 
-📌 Objetivo do Repositório
+📌 **Objetivo do Repositório**
 
-Este repositório contém os artefatos e o código-fonte desenvolvidos para o **Trabalho Prático 1 (T1)** da disciplina de Resolução de Problemas com Grafos. O objetivo principal deste projeto é aplicar conceitos práticos de modelagem estrutural e algoritmos de busca em grafos para resolver o problema **"Ladder Takahashi" (AtCoder ABC277 C)**.
+Este repositório contém os artefatos e o código-fonte desenvolvidos para o **Trabalho Prático 2 (T2)** da disciplina de Resolução de Problemas com Grafos. O objetivo principal deste projeto é aplicar conceitos avançados de modelagem estrutural e algoritmos de emparelhamento em grafos para resolver o problema **"Paintball" (Kattis - Problema I)**.
 
-Todo o processo de desenvolvimento está documentado na pasta `acompanhamento/`, dividido em quatro marcos que demonstram a evolução da nossa solução:
+Todo o processo de desenvolvimento está documentado na pasta `acompanhamento/`, dividido em marcos que demonstram a evolução da solução:
 
-* **Modelagem matemática** do problema delimitando vértices e arestas.
-* **Representação computacional** eficiente utilizando compressão de coordenadas e listas de adjacência.
-* Aplicação e testes com **Busca em Profundidade (DFS)** e validação cruzada.
-* Escolha final da **Busca em Largura (BFS)** justificada por testes de estresse, culminando na submissão e no veredito `Accepted`.
+* **Marco 1:** Modelagem matemática do problema, delimitando o grafo bipartido ($|V| = 2N$, $|E| = 2M$) e a redução ao problema de Emparelhamento Perfeito (*Bipartite Perfect Matching*).
+* **Marco 2:** Caracterização da propriedade estrutural, caminhos aumentantes (Lema de Berge), estados adicionais da busca e análise do efeito cascata de desalocação/realocação.
+* **Marco 3:** Aplicação do Algoritmo de Kuhn utilizando Busca em Profundidade (DFS) para encontrar caminhos aumentantes, controle de recursão e validação estrutural.
+* **Marco 4:** Validação cruzada com oráculos independentes, testes de estresse em limites de restrição e conclusão com submissão ao juiz online.
 
 ---
 
@@ -17,115 +17,99 @@ Todo o processo de desenvolvimento está documentado na pasta `acompanhamento/`,
 
 ### Pré-requisitos
 
-* Python 3.10+
-* Biblioteca `numpy` instalada (`pip install numpy`)
+* Python 3.10+ (testado e homologado no Python 3.14)
+* Não há dependências externas de pacotes (`numpy`, `scipy`, etc. são opcionais).
 
-O pacote `algs4/` (implementações de referência de Sedgewick & Wayne, adaptadas de nosso professor) já está incluído dentro de `src/algs4/`, então nenhuma instalação adicional é necessária além do `numpy`.
+O pacote `algs4/` (implementações de referência de Sedgewick & Wayne adaptadas para a disciplina) já está incluído dentro de `src/algs4/`.
 
-### Estrutura relevante para execução
+### Estrutura de Arquivos para Execução
 
 ```text
-T1/
+T2/
 ├── src/
-│   ├── algs4/              # pacote de referência (Graph, Bag, UF, CC, BreadthFirstPaths)
-│   ├── grafo_base.py        # leitura da entrada, compressão de coordenadas, oráculos de validação
-│   ├── marco3_dfs.py        # DFS adaptada + validação cruzada (DFS x UF x CC)
-│   └── marco4_bfs.py        # BFS (solução final) + validação cruzada + submissão
-└── dados/
-    ├── casos-de-teste.txt   # casos de exemplo (Sample 1, 2, 3 do enunciado)
-    └── gerador.py           # gera casos de teste adicionais, incluindo estresse
+│   ├── algs4/              # pacote de referência do professor (Graph, Bag, etc.)
+│   ├── grafo_base.py        # leitura de stdin, construção do grafo bipartido e validação estrutural
+│   ├── kuhn_matcher.py      # algoritmo de Kuhn (busca de caminhos aumentantes via DFS)
+│   ├── main.py              # ponto de entrada de desenvolvimento com validações e prints detalhados
+│   ├── main_submissao.py    # ponto de entrada para submissão no Kattis (saída estrita)
+│   └── gerador.py           # ferramenta de apoio: gera casos sample1, impossible e estresse
+├── acompanhamento/
+│   ├── marco-1.md           # modelagem inicial e grafo bipartido
+│   ├── marco-2.md           # propriedade estrutural e caminhos aumentantes
+│   ├── marco-3.md           # implementação do Kuhn, DFS e testes
+│   └── marco-4.md           # validação cruzada, estresse e submissão
+└── Problema_Paintball.pdf   # especificação original do problema
 ```
 
-Todos os scripts leem a entrada pelo **stdin** — nenhum deles abre arquivo sozinho. Isso significa que existem **duas formas** de fornecer a entrada, detalhadas abaixo.
+Todos os scripts leem a entrada pelo **stdin** — nenhum deles abre arquivo diretamente no código.
 
 ---
 
-### Opção 1 — Digitando a entrada diretamente no terminal
+### Opção 1 — Execução via Pipe com o `gerador.py`
 
-Útil para testar rapidamente sem precisar criar um arquivo.
+A forma mais rápida e conveniente de testar no terminal:
 
-1. A partir de `T1/src`, rode o script desejado, por exemplo:
+```bash
+# Testar o caso de exemplo válido (Sample 1)
+python gerador.py sample1 | python main.py
+
+# Testar o caso sem solução (Impossible)
+python gerador.py impossible | python main.py
+
+# Testar caso de estresse com limites máximos (N=1000 jogadores, M=5000 arestas)
+python gerador.py estresse --n 1000 --m 5000 --seed 42 | python main.py
+```
+
+*(No Windows, substitua `python` por `python3.14` ou seu executável Python configurado caso necessário).*
+
+---
+
+### Opção 2 — Digitando a entrada diretamente no terminal
+
+1. A partir de `T2/src`, execute:
    ```bash
-   python marco4_bfs.py
+   python main.py
    ```
-2. O terminal vai ficar aguardando a entrada. Digite (ou cole) o caso de teste, linha por linha, seguindo o formato do problema:
+2. Digite ou cole a entrada no formato do problema:
    ```text
-   N
-   A1 B1
-   A2 B2
+   N M
+   u1 v1
    ...
-   AN BN
+   uM vM
    ```
-   Exemplo (Sample 1 do enunciado):
-   ```text
-   4
-   1 4
-   4 3
-   4 10
-   8 3
-   ```
-3. Sinalize o **fim da entrada**:
-   * **Windows / PowerShell:** pressione `Ctrl+Z` e depois `Enter`.
-   * **Linux / macOS:** pressione `Ctrl+D`.
-4. O programa processa tudo de uma vez e imprime o resultado.
+3. Sinalize o fim da entrada:
+   * **Windows / PowerShell:** `Ctrl+Z` e depois `Enter`.
+   * **Linux / macOS:** `Ctrl+D`.
 
 ---
 
-### Opção 2 — Fornecendo um arquivo de dentro de `dados/`
+### Opção 3 — Redirecionando um arquivo de texto
 
-Útil para reexecutar o mesmo caso várias vezes sem redigitar, e obrigatório para casos grandes (estresse), que seriam inviáveis de digitar manualmente.
+Caso possua a entrada salva em um arquivo `.txt`:
 
-1. Garanta que o arquivo de teste existe em `T1/dados/` (por exemplo, `casos-de-teste.txt`, já incluído com os Samples do enunciado).
-2. A partir de `T1/src`, rode o script redirecionando o arquivo com o operador `<`:
-   ```bash
-   python marco4_bfs.py < ../dados/casos-de-teste.txt
-   ```
-   No Windows/PowerShell, o comando é o mesmo:
-   ```powershell
-   python marco4_bfs.py < ..\dados\casos-de-teste.txt
-   ```
-3. A saída aparece imediatamente, sem necessidade de digitar nada ou sinalizar fim de entrada — o arquivo já entrega o conteúdo completo ao programa.
+```bash
+python main.py < caminho/para/arquivo.txt
+```
 
-**Scripts disponíveis para execução (ambas as opções acima funcionam para qualquer um deles):**
+---
 
-| Script | O que faz ao rodar |
+## 🛠️ Scripts Disponíveis
+
+| Script | Finalidade |
 |---|---|
-| `marco3_dfs.py` | valida a estrutura do grafo, executa a DFS adaptada e compara o resultado com dois oráculos independentes (UF e CC) |
-| `marco4_bfs.py` | executa a BFS (algoritmo de submissão), compara com DFS, UF e CC, e serve de base para a versão final entregue ao AtCoder |
-
-`grafo_base.py` não deve ser executado diretamente — ele só define classes e funções reutilizadas pelos outros dois scripts.
-
----
-
-### O papel do `gerador.py`
-
-`dados/gerador.py` é uma **ferramenta de apoio ao desenvolvimento**, e não faz parte da solução do problema em si — por isso vive em `dados/`, ao lado dos casos de teste, e não em `src/`.
-
-**O que ele faz:** gera arquivos `.txt` no mesmo formato de entrada esperado pelo problema (`N` seguido de `N` pares `Ai Bi`), permitindo criar casos que seriam impraticáveis de montar manualmente, como:
-
-* **Casos de estresse**, com $N$ próximo do limite máximo ($N = 2\times10^5$), usados para medir tempo de execução e verificar se a solução respeita a complexidade $O(V+E)$ esperada.
-* **Casos estruturais específicos**, como um grafo em formato de cadeia (`1-2, 2-3, 3-4, ...`), que foi o cenário usado para comprovar empiricamente o `RecursionError` da DFS recursiva e justificar a escolha da BFS para a submissão final (ver `acompanhamento/marco-3.md`, Seção 4).
-
-**Como usar:** rode o gerador a partir de `T1/dados`, redirecionando a saída para um novo arquivo de teste:
-
-```bash
-python gerador.py > teste_estresse.txt
-```
-
-Em seguida, use esse arquivo gerado exatamente como qualquer outro caso de teste, seguindo a **Opção 2** acima:
-
-```bash
-python marco4_bfs.py < ../dados/teste_estresse.txt
-```
+| `main.py` | Executa a validação estrutural no Sample 1, roda o algoritmo de Kuhn e exibe detalhadamente a atribuição atirador $\to$ alvo, conferindo se todos os jogadores foram usados como alvo exatamente uma vez. |
+| `main_submissao.py` | Versão estrita para o juiz Kattis: imprime apenas `Impossible` ou as $N$ linhas com os alvos atribuídos a cada jogador. |
+| `gerador.py` | Ferramenta auxiliar de testes para gerar instâncias de teste (`sample1`, `impossible`, `estresse`). |
+| `grafo_base.py` | Módulo de infraestrutura que constrói o grafo bipartido $2N$ usando `algs4.graph.Graph`. Não deve ser executado diretamente. |
+| `kuhn_matcher.py` | Implementação do Algoritmo de Kuhn. |
 
 ---
 
 ## 🤖 Declaração de Uso de Inteligência Artificial
 
-Em conformidade com as diretrizes da disciplina, declaramos o uso de ferramentas de Inteligência Artificial (como o Gemini) como assistentes de desenvolvimento durante este trabalho.
+Em conformidade com as diretrizes da disciplina, declaramos o uso de ferramentas de Inteligência Artificial como assistentes de desenvolvimento durante este trabalho.
 
 A IA foi utilizada para os seguintes fins:
-
-* Refinamento e estruturação da documentação em Markdown.
-* Discussão de conceitos teóricos de grafos (como a diferença prática de memória entre Matriz e Lista de Adjacência).
-* Auxílio na formatação da apresentação e no detalhamento de casos de teste extremos (como o erro de recursão da DFS).
+* Refinamento conceitual e estruturação da documentação em Markdown dos Marcos.
+* Discussão teórica comparativa entre algoritmos de emparelhamento bipartido (Kuhn vs. Hopcroft-Karp).
+* Apoio na análise de complexidade e simulação de teste de mesa das chamadas recursivas com inversão de arestas.
