@@ -8,8 +8,8 @@
      ...
      uM vM
 
- NAO faz parte da solucao entregue - fica em dados/, nao em src/,
- seguindo a mesma organizacao adotada no T1.
+ Ferramenta auxiliar de apoio aos testes, localizada em src/ juntamente
+ com os demais scripts de desenvolvimento.
 
  Uso:
      python gerador.py sample1        > sample1.txt

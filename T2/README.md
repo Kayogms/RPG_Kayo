@@ -32,7 +32,8 @@ T2/
 │   ├── kuhn_matcher.py      # algoritmo de Kuhn (busca de caminhos aumentantes via DFS)
 │   ├── main.py              # ponto de entrada de desenvolvimento com validações e prints detalhados
 │   ├── main_submissao.py    # ponto de entrada para submissão no Kattis (saída estrita)
-│   └── gerador.py           # ferramenta de apoio: gera casos sample1, impossible e estresse
+│   ├── gerador.py           # ferramenta de apoio: gera casos sample1, impossible e estresse
+│   └── validador.py         # bateria local: casos dirigidos, força bruta e estresse
 ├── acompanhamento/
 │   ├── marco-1.md           # modelagem inicial e grafo bipartido
 │   ├── marco-2.md           # propriedade estrutural e caminhos aumentantes
@@ -100,6 +101,7 @@ python main.py < caminho/para/arquivo.txt
 | `main.py` | Executa a validação estrutural no Sample 1, roda o algoritmo de Kuhn e exibe detalhadamente a atribuição atirador $\to$ alvo, conferindo se todos os jogadores foram usados como alvo exatamente uma vez. |
 | `main_submissao.py` | Versão estrita para o juiz Kattis: imprime apenas `Impossible` ou as $N$ linhas com os alvos atribuídos a cada jogador. |
 | `gerador.py` | Ferramenta auxiliar de testes para gerar instâncias de teste (`sample1`, `impossible`, `estresse`). |
+| `validador.py` | Bateria de validação local: casos dirigidos, validação cruzada com força bruta (3.000 instâncias) e estresse $N=1000$, $M=5000$, conferindo a integridade de cada atribuição nas duas implementações. Uso: `python validador.py`. |
 | `grafo_base.py` | Módulo de infraestrutura que constrói o grafo bipartido $2N$ usando `algs4.graph.Graph`. Não deve ser executado diretamente. |
 | `kuhn_matcher.py` | Implementação do Algoritmo de Kuhn. |
 

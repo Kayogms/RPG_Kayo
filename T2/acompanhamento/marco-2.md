@@ -59,7 +59,7 @@ Para manter a rastreabilidade com o marco anterior, a execução abaixo usa a me
 
 **Correspondência final:** atirador 2 → alvo 1; atirador 3 → alvo 2; atirador 4 → alvo 3; atirador 1 → alvo 4.
 
-Todos os 4 atiradores foram emparelhados — emparelhamento perfeito confirmado. Esta atribuição é diferente, jogador a jogador, da apresentada como exemplo no Marco 1 (que tinha atirador 1 → alvo 2, formando o ciclo no sentido oposto), mas ambas são igualmente válidas: o enunciado aceita qualquer atribuição em que todos sejam atingidos exatamente uma vez, e a diferença aqui decorre apenas da ordem em que os alvos de cada atirador foram considerados durante a busca.
+Todos os 4 atiradores foram emparelhados — emparelhamento perfeito confirmado. Esta atribuição é diferente, jogador a jogador, da apresentada como exemplo no Marco 1 (que tinha atirador 1 → alvo 2, formando o ciclo no sentido oposto), mas ambas são igualmente válidas: o enunciado aceita qualquer atribuição em que todos sejam atingidos exatamente uma vez, e a diferença aqui decorre apenas da ordem em que os alvos de cada atirador foram considerados durante a busca (nesta simulação conceitual adotou-se a ordem natural dos vizinhos, e no Marco 3 formaliza-se o comportamento exato da lista encadeada LIFO do `Bag`).
 
 ---
 

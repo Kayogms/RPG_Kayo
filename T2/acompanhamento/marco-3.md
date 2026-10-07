@@ -131,7 +131,7 @@ A complexidade de pior caso do Algoritmo de Kuhn é obtida diretamente multiplic
 Multiplicando as duas partes:
 $$\text{Tempo Total} = O(V) \times O(E) = \mathbf{O(V \cdot E)}$$
 
-* **Na prática:** com $N \le 1.000$ e $M \le 5.000$ ($|V| = 2.000$ e $|E| = 10.000$), o número máximo de operações no pior cenário possível é de cerca de $10^7$ operações elementares. Em Python, isso roda em aproximadamente $0,1$ segundo (muito abaixo do limite de 1 a 2 segundos do juiz). Nos testes práticos, executou em menos de **0,05 segundos**.
+* **Na prática:** com $N \le 1.000$ e $M \le 5.000$ ($|V| = 2.000$ e $|E| = 10.000$), o número máximo de operações no pior cenário possível é de cerca de $10^7$ operações elementares. Em Python, isso roda em aproximadamente $0,1$ segundo (muito abaixo do limite de 1 a 2 segundos do juiz). Nos testes práticos, executou em cerca de **0,02 segundos** (com folga perante o limite de 0,05s e o limite de 1,0s da plataforma).
 
 ### 4.2 Complexidade de Memória (Distinção entre Grafo e Memória Auxiliar)
 

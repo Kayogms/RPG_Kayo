@@ -55,7 +55,7 @@ class LeitorEntrada:
         aparecem na entrada.
         """
         stream = stream or sys.stdin
-        data = stream.read().split()
+        data = stream.read().lstrip('\ufeff').split()
 
         if not data:
             return 0, []

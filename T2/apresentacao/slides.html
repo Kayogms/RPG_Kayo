@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Apresentação Paintball - T2 - Grupo E - UNIFOR</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    @page {
+      size: 1920px 1080px;
+      margin: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #e2e8f0;
+      color: #1e293b;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .slide {
+      width: 1920px;
+      height: 1080px;
+      position: relative;
+      background: #f8fafc;
+      overflow: hidden;
+      page-break-after: always;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Slides 1 e 2 com imagens de template oficiais */
+    .slide-full-img {
+      width: 1920px;
+      height: 1080px;
+      object-fit: fill;
+      display: block;
+    }
+
+    /* Estrutura dos slides 3 a 7 */
+    .slide-header {
+      padding: 60px 80px 20px 80px;
+    }
+
+    .slide-title {
+      font-size: 54px;
+      font-weight: 800;
+      color: #004de6;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+
+    .slide-subtitle {
+      font-size: 26px;
+      color: #475569;
+      font-weight: 500;
+    }
+
+    .slide-content {
+      flex: 1;
+      padding: 20px 80px 80px 80px;
+      display: flex;
+      gap: 40px;
+    }
+
+    /* Barra inferior estilo Unifor */
+    .slide-footer {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 54px;
+      display: flex;
+      font-weight: 600;
+      font-size: 20px;
+      color: #ffffff;
+    }
+
+    .footer-left {
+      width: 320px;
+      background: #002266;
+      display: flex;
+      align-items: center;
+      padding-left: 50px;
+      letter-spacing: 0.02em;
+    }
+
+    .footer-right {
+      flex: 1;
+      background: #004de6;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 60px;
+    }
+
+    /* Cards e Layouts */
+    .col-2 {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+    }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 30px 35px;
+      box-shadow: 0 4px 15px rgba(0, 34, 102, 0.04);
+    }
+
+    .card-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: #002266;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .card-title .badge-icon {
+      width: 36px;
+      height: 36px;
+      background: #eff6ff;
+      color: #004de6;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    p, li {
+      font-size: 22px;
+      line-height: 1.55;
+      color: #334155;
+    }
+
+    ul {
+      list-style-position: inside;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Tabelas estilizadas */
+    table.custom-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+      font-size: 21px;
+    }
+
+    table.custom-table th {
+      background: #004de6;
+      color: #ffffff;
+      padding: 16px 22px;
+      font-weight: 600;
+      text-align: left;
+    }
+
+    table.custom-table td {
+      background: #ffffff;
+      padding: 15px 22px;
+      border-bottom: 1px solid #f1f5f9;
+      color: #1e293b;
+    }
+
+    table.custom-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    table.custom-table tr:nth-child(even) td {
+      background: #f8fafc;
+    }
+
+    .badge-success {
+      display: inline-block;
+      background: #dcfce7;
+      color: #15803d;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 19px;
+    }
+
+    .badge-code {
+      font-family: 'JetBrains Mono', monospace;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 20px;
+    }
+
+    .highlight-box {
+      background: #eff6ff;
+      border-left: 6px solid #004de6;
+      padding: 20px 25px;
+      border-radius: 0 12px 12px 0;
+      font-size: 22px;
+      color: #1e3a8a;
+      line-height: 1.5;
+    }
+
+    /* Frame de imagem no Slide 7 */
+    .img-evidence {
+      width: 100%;
+      height: auto;
+      max-height: 530px;
+      object-fit: contain;
+      border-radius: 12px;
+      border: 2px solid #cbd5e1;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================== -->
+  <!-- SLIDE 1: Capa Oficial UNIFOR                                    -->
+  <!-- ============================================================== -->
+  <div class="slide">
+    <img src="template_page_1.png" class="slide-full-img" alt="Capa UNIFOR">
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- SLIDE 2: Título Oficial do Trabalho e Integrantes             -->
+  <!-- ============================================================== -->
+  <div class="slide">
+    <img src="template_page_2.png" class="slide-full-img" alt="Título e Integrantes UNIFOR">
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- SLIDE 3: O Problema e Modelagem Bipartida                       -->
+  <!-- ============================================================== -->
+  <div class="slide">
+    <div class="slide-header">
+      <div class="slide-title">Paintball: Problema e Modelagem Bipartida</div>
+      <div class="slide-subtitle">Redução formal para emparelhamento perfeito de tamanho N</div>
+    </div>
+    <div class="slide-content">
+      <div class="col-2">
+        <div class="card">
+          <div class="card-title">
+            <span class="badge-icon">🎯</span>
+            Regras e Objetivo
+          </div>
+          <ul>
+            <li><strong>Entrada:</strong> <em>N</em> jogadores (2 ≤ <em>N</em> ≤ 1.000) e <em>M</em> pares de visibilidade mútua (0 ≤ <em>M</em> ≤ 5.000).</li>
+            <li><strong>Munição estrita:</strong> Cada jogador possui exatamente <strong>uma bola de tinta</strong>.</li>
+            <li><strong>Condição de tiro:</strong> Só é possível atirar em quem se consegue enxergar (<em>u</em> ↔ <em>v</em>).</li>
+            <li><strong>Alvo exclusivo:</strong> Cada jogador deve ser atingido <strong>exatamente uma vez</strong>.</li>
+            <li><strong>Saída:</strong> Alvo de cada jogador 1 … <em>N</em> ou <span class="badge-code">Impossible</span>.</li>
+          </ul>
+        </div>
+        <div class="highlight-box">
+          <strong>Propriedade Estrutural:</strong> O problema reduz-se a encontrar um <strong>Emparelhamento Perfeito em Grafo Bipartido</strong> (<em>Bipartite Perfect Matching</em>), saturando todos os vértices.
+        </div>
+      </div>
+
+      <div class="col-2">
+        <div class="card">
+          <div class="card-title">
+            <span class="badge-icon">👥</span>
+            A Dualidade de Papéis (2N Vértices)
+          </div>
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Elemento Original</th>
+                <th>Modelo Bipartido Duplicado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Jogador <em>k</em></strong></td>
+                <td><strong>Atirador <em>A<sub>k</sub></em></strong> (quem atira) e <strong>Alvo <em>B<sub>k</sub></em></strong> (quem recebe)</td>
+              </tr>
+              <tr>
+                <td><strong>Vértices (<em>V</em>)</strong></td>
+                <td>|<em>V</em>| = 2<em>N</em> (conjuntos disjuntos <em>A</em> e <em>B</em>)</td>
+              </tr>
+              <tr>
+                <td><strong>Visibilidade (<em>u, v</em>)</strong></td>
+                <td>Duas arestas direcionadas: <em>A<sub>u</sub></em> → <em>B<sub>v</sub></em> e <em>A<sub>v</sub></em> → <em>B<sub>u</sub></em></td>
+              </tr>
+              <tr>
+                <td><strong>Arestas (<em>E</em>)</strong></td>
+                <td>|<em>E</em>| = 2<em>M</em> conexões direcionadas de tiro</td>
+              </tr>
+              <tr>
+                <td><strong>Classificação</strong></td>
+                <td>Grafo Bipartido, simples e não ponderado</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <div class="footer-left">Paintball · T2 · Grupo E</div>
+      <div class="footer-right">
+        <span>Universidade de Fortaleza</span>
+        <span>3/7</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- SLIDE 4: Classes de algs4: Reutilização e Adaptações            -->
+  <!-- ============================================================== -->
+  <div class="slide">
+    <div class="slide-header">
+      <div class="slide-title">Reutilização e Adaptações de algs4</div>
+      <div class="slide-subtitle">Aderência ao repositório de referência do professor (carubbi/RPG)</div>
+    </div>
+    <div class="slide-content">
+      <div class="col-2">
+        <div class="card">
+          <div class="card-title">
+            <span class="badge-icon">📦</span>
+            Reutilizadas sem Alteração (algs4)
+          </div>
+          <ul>
+            <li><span class="badge-code">algs4.graph.Graph</span>:
+              <br><small style="font-size:19px; color:#64748b;">Instanciado com 2<em>N</em> vértices para armazenar a adjacência bipartida.</small>
+            </li>
+            <li><span class="badge-code">algs4.bag.Bag</span>:
+              <br><small style="font-size:19px; color:#64748b;">Lista encadeada interna de cada vértice. A inserção em <em>O</em>(1) no início (LIFO) define a ordem de consulta dos alvos.</small>
+            </li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title">
+            <span class="badge-icon">⚖️</span>
+            Por que DepthFirstPaths não serviu?
+          </div>
+          <p style="font-size: 20px;">
+            A classe <span class="badge-code">DepthFirstPaths</span> usa marcação permanente para conectividade simples.
+            O emparelhamento exige:
+          </p>
+          <ul style="font-size: 20px; margin-top: 8px;">
+            <li>Marcação temporária (<span class="badge-code">visitado</span>) zerada a cada atirador;</li>
+            <li>Lógica de <strong>desalocação e realocação recursiva</strong> ao colidir com alvo ocupado.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-2">
+        <div class="card">
+          <div class="card-title">
+            <span class="badge-icon">⚙️</span>
+            Implementação: KuhnMatcher
+          </div>
+          <ul>
+            <li><strong>Classe dedicada:</strong> criada para implementar o Algoritmo de Kuhn com DFS sobre a estrutura <span class="badge-code">Graph</span>.</li>
+            <li><strong>Estado global:</strong> <span class="badge-code">match_para[alvo]</span> mantém o emparelhamento construído.</li>
+            <li><strong>Recursão:</strong> tenta realocar o ocupante atual antes de ceder o alvo para o novo atirador.</li>
+          </ul>
+        </div>
+        <div class="card" style="border-left: 6px solid #16a34a;">
+          <div class="card-title" style="color: #16a34a;">
+            <span class="badge-icon" style="background: #dcfce7; color: #16a34a;">🚀</span>
+            Versão Autocontida (main_submissao.py)
+          </div>
+          <p style="font-size: 20px;">
+            Para o juiz online <strong>Kattis</strong>, unificou-se o modelo em um único arquivo autônomo, substituindo <span class="badge-code">Bag</span> por listas nativas do Python e garantindo compatibilidade estrita sem dependências externas.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <div class="footer-left">Paintball · T2 · Grupo E</div>
+      <div class="footer-right">
+        <span>Universidade de Fortaleza</span>
+        <span>4/7</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- SLIDE 5: Algoritmo de Kuhn e Rastreamento Didático C4           -->
+  <!-- ============================================================== -->
+  <div class="slide">
+    <div class="slide-header">
+      <div class="slide-title">Algoritmo de Kuhn: Rastreamento no Exemplo C4</div>
+      <div class="slide-subtitle">Simulação manual detalhada demonstrando o efeito cascata de desalocação</div>
+    </div>
+    <div class="slide-content" style="flex-direction: column; gap: 20px;">
+      <div class="card" style="padding: 22px 30px;">
+        <p style="font-size: 21px;">
+          <strong>Instância Didática:</strong> <em>N</em> = 4 jogadores em ciclo (1-2, 2-3, 3-4, 4-1).  
+          Devido à inserção LIFO do <span class="badge-code">Bag</span>, a ordem de consulta de <em>A</em><sub>1</sub> é <em>B</em><sub>4</sub> e depois <em>B</em><sub>2</sub>.
+        </p>
+      </div>
+
+      <table class="custom-table" style="font-size: 20px;">
+        <thead>
+          <tr>
+            <th>Passo</th>
+            <th>Atirador</th>
+            <th>Alvo Consultado</th>
+            <th>Situação</th>
+            <th>Decisão / Ação do Algoritmo</th>
+            <th>Caminho Aumentante</th>
+            <th>Emparelhamento Atual</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1</strong></td>
+            <td><strong><em>A</em><sub>1</sub></strong> (Jog. 1)</td>
+            <td><em>B</em><sub>4</sub> (Jog. 4)</td>
+            <td>Livre</td>
+            <td><em>A</em><sub>1</sub> assume <em>B</em><sub>4</sub> diretamente.</td>
+            <td><em>A</em><sub>1</sub> → <em>B</em><sub>4</sub></td>
+            <td>{<em>A</em><sub>1</sub> → <em>B</em><sub>4</sub>}</td>
+          </tr>
+          <tr>
+            <td><strong>2</strong></td>
+            <td><strong><em>A</em><sub>2</sub></strong> (Jog. 2)</td>
+            <td><em>B</em><sub>3</sub> (Jog. 3)</td>
+            <td>Livre</td>
+            <td><em>A</em><sub>2</sub> assume <em>B</em><sub>3</sub> diretamente.</td>
+            <td><em>A</em><sub>2</sub> → <em>B</em><sub>3</sub></td>
+            <td>{<em>A</em><sub>1</sub> → <em>B</em><sub>4</sub>, <em>A</em><sub>2</sub> → <em>B</em><sub>3</sub>}</td>
+          </tr>
+          <tr>
+            <td><strong>3</strong></td>
+            <td><strong><em>A</em><sub>3</sub></strong> (Jog. 3)</td>
+            <td><em>B</em><sub>4</sub> (Jog. 4)</td>
+            <td><strong style="color: #dc2626;">Ocupado por <em>A</em><sub>1</sub></strong></td>
+            <td><strong>Efeito Cascata:</strong> <em>A</em><sub>3</sub> pede para <em>A</em><sub>1</sub> mudar de alvo. <em>A</em><sub>1</sub> consulta <em>B</em><sub>2</sub>, que está livre. <em>A</em><sub>1</sub> migra para <em>B</em><sub>2</sub>. <em>A</em><sub>3</sub> assume <em>B</em><sub>4</sub>.</td>
+            <td><em>A</em><sub>3</sub> → <em>B</em><sub>4</sub> → <em>A</em><sub>1</sub> → <em>B</em><sub>2</sub></td>
+            <td>{<em>A</em><sub>1</sub> → <em>B</em><sub>2</sub>, <em>A</em><sub>2</sub> → <em>B</em><sub>3</sub>, <em>A</em><sub>3</sub> → <em>B</em><sub>4</sub>}</td>
+          </tr>
+          <tr>
+            <td><strong>4</strong></td>
+            <td><strong><em>A</em><sub>4</sub></strong> (Jog. 4)</td>
+            <td><em>B</em><sub>1</sub> (Jog. 1)</td>
+            <td>Livre</td>
+            <td><em>A</em><sub>4</sub> assume <em>B</em><sub>1</sub> diretamente.</td>
+            <td><em>A</em><sub>4</sub> → <em>B</em><sub>1</sub></td>
+            <td>{<em>A</em><sub>1</sub> → <em>B</em><sub>2</sub>, <em>A</em><sub>2</sub> → <em>B</em><sub>3</sub>, <em>A</em><sub>3</sub> → <em>B</em><sub>4</sub>, <em>A</em><sub>4</sub> → <em>B</em><sub>1</sub>}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="highlight-box" style="padding: 16px 25px;">
+        <strong>Resultado Final:</strong> Jogador 1 atira no 2 | Jogador 2 no 3 | Jogador 3 no 4 | Jogador 4 no 1. Resposta: <strong>2, 3, 4, 1</strong> (perfeito e bijetor).
+      </div>
+    </div>
+    <div class="slide-footer">
+      <div class="footer-left">Paintball · T2 · Grupo E</div>
+      <div class="footer-right">
+        <span>Universidade de Fortaleza</span>
+        <span>5/7</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- SLIDE 6: Complexidade e Validação Local                         -->
+  <!-- ============================================================== -->
+  <div class="slide">
+    <div class="slide-header">
+      <div class="slide-title">Complexidade e Validação Local Rigorosa</div>
+      <div class="slide-subtitle">Fundamentação de desempenho assintótico e bateria de testes locais</div>
+    </div>
+    <div class="slide-content">
+      <div class="col-2">
+        <div class="card">
+          <div class="card-title">
+            <span class="badge-icon">⏱️</span>
+            Complexidade Assintótica
+          </div>
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Operação</th>
+                <th>Complexidade</th>
+                <th>No Pior Caso (Kattis)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Construção do Grafo</strong></td>
+                <td><em>O</em>(<em>N</em> + <em>M</em>)</td>
+                <td>2.000 + 10.000 passos</td>
+              </tr>
+              <tr>
+                <td><strong>Algoritmo de Kuhn</strong></td>
+                <td><em>O</em>(<em>V</em> · <em>E</em>) = <em>O</em>(<em>NM</em>)</td>
+                <td>Limite teórico ≈ 10<sup>7</sup>; na prática ≈ 0,07 s</td>
+              </tr>
+              <tr>
+                <td><strong>Memória do Grafo</strong></td>
+                <td><em>O</em>(<em>N</em> + <em>M</em>)</td>
+                <td>&lt; 2 MB de memória</td>
+              </tr>
+              <tr>
+                <td><strong>Memória Auxiliar</strong></td>
+                <td><em>O</em>(<em>N</em>)</td>
+                <td>Arrays e pilha de chamadas</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title">
+            <span class="badge-icon">🛡️</span>
+            RecursionError Prevenido
+          </div>
+          <p style="font-size: 20px;">
+            Lição herdada do T1: com <em>N</em> = 1000, cadeias lineares de deslocamento poderiam atingir o limite padrão de recursão do Python.
+            Configurou-se preventivamente <span class="badge-code">sys.setrecursionlimit(200000)</span>.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-2">
+        <div class="card">
+          <div class="card-title">
+            <span class="badge-icon">🧪</span>
+            Bateria de Testes no Repositório
+          </div>
+          <ul>
+            <li><strong>Casos Dirigidos (11):</strong>
+              <br><small style="font-size:19px; color:#475569;">Exemplos do enunciado (<span class="badge-code">Sample 1</span> e <span class="badge-code">Sample 2 - Impossible</span>), C4, componentes desconexas, jogador isolado e cadeia com <em>N</em> = 1.000.</small>
+            </li>
+            <li><strong>Validação Cruzada com Força Bruta:</strong>
+              <br><small style="font-size:19px; color:#475569;">3.000 instâncias aleatórias (<em>N</em> ≤ 7) comparadas a um oráculo que testa todas as <em>N</em>! atribuições: 0 divergências.</small>
+            </li>
+            <li><strong>Estresse com gerador.py e Tempo Medido:</strong>
+              <br><small style="font-size:19px; color:#15803d; font-weight: 600;"><em>N</em> = 1.000 e <em>M</em> = 5.000: ≈ 0,07 s localmente e 0,14 s no juiz, dentro do limite de 1,0 s.</small>
+            </li>
+            <li><strong>Integridade da Atribuição (validador.py):</strong>
+              <br><small style="font-size:19px; color:#475569;">Toda resposta é conferida: cada alvo está na adjacência do atirador e cada jogador é atingido exatamente uma vez.</small>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <div class="footer-left">Paintball · T2 · Grupo E</div>
+      <div class="footer-right">
+        <span>Universidade de Fortaleza</span>
+        <span>6/7</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- SLIDE 7: Conclusão e Evidência Oficial de ACCEPTED             -->
+  <!-- ============================================================== -->
+  <div class="slide">
+    <div class="slide-header">
+      <div class="slide-title">Conclusão e Veredito Oficial no Kattis</div>
+      <div class="slide-subtitle">Solução validada e aceita pelo juiz online internacional</div>
+    </div>
+    <div class="slide-content">
+      <div class="col-2" style="flex: 1.3;">
+        <div class="card" style="padding: 20px;">
+          <div class="card-title" style="margin-bottom: 12px; font-size: 24px;">
+            <span class="badge-icon" style="background: #dcfce7; color: #16a34a;">🏆</span>
+            Evidência Oficial da Submissão (Kattis)
+          </div>
+          <img src="../evidencias/Captura de tela 2026-10-07 144512.png" class="img-evidence" alt="Accepted Kattis">
+        </div>
+      </div>
+
+      <div class="col-2" style="flex: 0.9;">
+        <div class="card" style="border: 2px solid #86efac; background: #f0fdf4;">
+          <div class="card-title" style="color: #15803d; font-size: 26px;">
+            <span>✅</span>
+            Veredito: Accepted
+          </div>
+          <ul style="font-size: 21px;">
+            <li><strong>Submissão:</strong> <span class="badge-code">20629089</span></li>
+            <li><strong>Problema:</strong> Paintball (Kattis)</li>
+            <li><strong>Autor:</strong> RAFAEL DA SILVA LEITES</li>
+            <li><strong>Linguagem:</strong> Python 3</li>
+            <li><strong>Casos de Teste:</strong> <strong style="color: #16a34a;">29 / 29 aprovados</strong></li>
+            <li><strong>Tempo de Execução:</strong> <strong style="color: #16a34a;">0.14 s</strong> (limite: 1.00 s)</li>
+            <li><strong>Arquivo Submetido:</strong> <span class="badge-code">main_submissao.py</span></li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span class="badge-icon">📌</span>
+            Conclusão
+          </div>
+          <p style="font-size: 20px;">
+            O modelo de <strong>Grafo Bipartido com Algoritmo de Kuhn</strong> provou-se a estratégia ideal: simplicidade estrutural, alta eficiência e precisão garantida em todos os 29 cenários de teste da plataforma.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <div class="footer-left">Paintball · T2 · Grupo E</div>
+      <div class="footer-right">
+        <span>Universidade de Fortaleza</span>
+        <span>7/7</span>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
