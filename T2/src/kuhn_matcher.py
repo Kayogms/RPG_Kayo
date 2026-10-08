@@ -10,7 +10,7 @@
  direta, pois exige (1) marcacao reiniciada a cada tentativa de
  atirador, e (2) uma recursao que decide desalocar o emparelhamento
  atual de um alvo ocupado, em vez de apenas decidir "para onde ir"
- entre vizinhos nao visitados.
+ entre vizinhos nao targets.
 
  O padrao recursivo com vetor de marcacao (visited) foi mantido
  como inspiracao estrutural da DFS classica, mas a logica de
@@ -33,7 +33,7 @@
                                   resolve a cada rodada
  Quem dispara tudo e o main.py:
      matcher = KuhnMatcher(G, n)   -> __init__
-     assign = matcher.resolve()   -> resolve -> _try_path
+     assign = matcher.resolve()   -> resolve -> _tentar_...
 =================================================================
 """
 
@@ -59,7 +59,7 @@ class KuhnMatcher:
     def __init__(self, G: Graph, n: int):
         self.G = G
         self.n = n
-        # match_to[target_idx] = shooter que atira nesse alvo,
+        # match_para[idx_alvo] = idx_atirador que atira nesse alvo,
         # ou None se o alvo estiver livre. Comeca tudo livre.
         #
         # Este vetor PERSISTE entre as rodadas: o que um atirador
@@ -68,7 +68,7 @@ class KuhnMatcher:
         #
         # Tem tamanho 2N para ser indexado direto pelo indice do
         # alvo no grafo; so as posicoes N..2N-1 sao usadas.
-        self.match_to = [None] * (2 * n)
+        self.match_para = [None] * (2 * n)
 
     # -------------------------------------------------------------
     # 2. LACO PRINCIPAL: UMA RODADA POR ATIRADOR
@@ -83,43 +83,43 @@ class KuhnMatcher:
             emparelhamento perfeito.
             None, se nao existir (resposta = Impossible).
         """
-        for shooter in range(self.n):
-            # visited e ZERADO a cada rodada: dentro de uma rodada,
+        for atirador in range(self.n):
+            # target e ZERADO a cada rodada: dentro de uma rodada,
             # cada alvo e tentado no maximo uma vez (evita ciclos);
-            # mas o match_to mudou desde a rodada anterior, entao
+            # mas o match_para mudou desde a rodada anterior, entao
             # alvos ja explorados antes podem levar a novos caminhos.
             # Por isso o custo total e N rodadas x O(V+E) = O(V.E).
-            visited = set()
+            target = set()
 
-            success = self._try_path(shooter, visited)
+            sucesso = self._try_path(atirador, target)
 
             # Se um unico atirador nao consegue alvo, nenhum
             # emparelhamento perfeito existe: nao adianta continuar.
-            if not success:
+            if not sucesso:
                 return None   # emparelhamento perfeito impossivel
 
-        # Todos os N atiradores foram emparelhados. O match_to
+        # Todos os N atiradores foram emparelhados. O match_para
         # esta no sentido "alvo -> quem atira nele"; a saida pede
         # "jogador -> em quem ele atira", entao invertemos.
         assign = [None] * self.n
-        for target_idx in range(self.n, 2 * self.n):
-            shooter = self.match_to[target_idx]
-            if shooter is not None:
-                target_player = target_idx - self.n + 1   # indice -> jogador
-                assign[shooter] = target_player
+        for idx_alvo in range(self.n, 2 * self.n):
+            atirador = self.match_para[idx_alvo]
+            if atirador is not None:
+                jogador_alvo = idx_alvo - self.n + 1   # indice -> jogador
+                assign[s] = jogador_alvo
 
         return assign
 
     # -------------------------------------------------------------
     # 3. BUSCA RECURSIVA DO CAMINHO AUMENTANTE
     # -------------------------------------------------------------
-    def _try_path(self, shooter, visited):
+    def _try_path(self, atirador, target):
         """
-        Tenta arranjar um alvo para `shooter`, nem que para isso
+        Tenta arranjar um alvo para `atirador`, nem que para isso
         precise deslocar o dono atual de um alvo para outro alvo
         (e assim por diante, em cascata).
 
-        `visited` e o MESMO conjunto em todas as chamadas recursivas
+        `target` e o MESMO conjunto em todas as chamadas recursivas
         de uma rodada (criado em `resolve`).
 
         Retorna True se um caminho aumentante foi encontrado e o
@@ -129,31 +129,31 @@ class KuhnMatcher:
         # Percorre os alvos que o atirador enxerga, na ordem da
         # lista de adjacencia (Bag do algs4: a ultima aresta inserida
         # e a primeira consultada).
-        for target in self.G.adj[shooter]:
+        for alvo in self.G.adj[s]:
 
             # Alvo ja tentado nesta rodada (por este atirador ou por
             # alguem acima na pilha de recursao): pula. Sem isso, dois
             # atiradores poderiam "tomar" o alvo um do outro para sempre.
-            if target in visited:
+            if alvo in target:
                 continue
-            visited.add(target)
+            target.add(alvo)
 
-            owner = self.match_to[target]
+            shooter = self.match_para[t]
 
             # Duas formas de ficar com o alvo:
             #   - ele esta livre (None); por curto-circuito do `or`,
             #     a recursao nem e chamada; ou
             #   - ele esta ocupado, mas o dono atual consegue trocar
-            #     de alvo: chamada recursiva para o owner,
-            #     reaproveitando o mesmo `visited`.
-            if owner is None or self._try_path(
-                owner, visited
+            #     de alvo: chamada recursiva para o shooter,
+            #     reaproveitando o mesmo `target`.
+            if shooter is None or self._try_path(
+                shooter, target
             ):
                 # Executado na VOLTA da recursao: cada nivel assume o
                 # alvo que o nivel de baixo acabou de liberar. Isso
                 # inverte as arestas do caminho aumentante e aumenta
                 # o emparelhamento em exatamente 1.
-                self.match_to[target] = shooter
+                self.match_para[t] = shooter
                 return True
 
             # O dono atual nao conseguiu trocar: tenta o proximo alvo.
