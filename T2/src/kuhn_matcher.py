@@ -28,12 +28,12 @@
 
  ORDEM DE LEITURA (= ordem de execucao):
    1. __init__                    prepara o estado (roda 1 vez)
-   2. resolver                    laco das rodadas, 1 por atirador
-   3. _tentar_caminho_aumentante  busca recursiva chamada pelo
-                                  resolver a cada rodada
+   2. resolve                    laco das rodadas, 1 por atirador
+   3. _try_path  busca recursiva chamada pelo
+                                  resolve a cada rodada
  Quem dispara tudo e o main.py:
      matcher = KuhnMatcher(G, n)   -> __init__
-     assign = matcher.resolver()   -> resolver -> _tentar_...
+     assign = matcher.resolve()   -> resolve -> _try_path
 =================================================================
 """
 
@@ -50,7 +50,7 @@ class KuhnMatcher:
 
     Uso:
         matcher = KuhnMatcher(G, n)
-        assign = matcher.resolver()   # None se Impossible
+        assign = matcher.resolve()   # None se Impossible
     """
 
     # -------------------------------------------------------------
@@ -59,7 +59,7 @@ class KuhnMatcher:
     def __init__(self, G: Graph, n: int):
         self.G = G
         self.n = n
-        # match_para[idx_alvo] = idx_atirador que atira nesse alvo,
+        # match_to[target_idx] = shooter que atira nesse alvo,
         # ou None se o alvo estiver livre. Comeca tudo livre.
         #
         # Este vetor PERSISTE entre as rodadas: o que um atirador
@@ -68,12 +68,12 @@ class KuhnMatcher:
         #
         # Tem tamanho 2N para ser indexado direto pelo indice do
         # alvo no grafo; so as posicoes N..2N-1 sao usadas.
-        self.match_para = [None] * (2 * n)
+        self.match_to = [None] * (2 * n)
 
     # -------------------------------------------------------------
     # 2. LACO PRINCIPAL: UMA RODADA POR ATIRADOR
     # -------------------------------------------------------------
-    def resolver(self):
+    def resolve(self):
         """
         Executa o Algoritmo de Kuhn para todos os N atiradores.
 
@@ -83,44 +83,44 @@ class KuhnMatcher:
             emparelhamento perfeito.
             None, se nao existir (resposta = Impossible).
         """
-        for atirador in range(self.n):
-            # visitado e ZERADO a cada rodada: dentro de uma rodada,
+        for shooter in range(self.n):
+            # visited e ZERADO a cada rodada: dentro de uma rodada,
             # cada alvo e tentado no maximo uma vez (evita ciclos);
-            # mas o match_para mudou desde a rodada anterior, entao
+            # mas o match_to mudou desde a rodada anterior, entao
             # alvos ja explorados antes podem levar a novos caminhos.
             # Por isso o custo total e N rodadas x O(V+E) = O(V.E).
-            visitado = set()
+            visited = set()
 
-            sucesso = self._tentar_caminho_aumentante(atirador, visitado)
+            success = self._try_path(shooter, visited)
 
             # Se um unico atirador nao consegue alvo, nenhum
             # emparelhamento perfeito existe: nao adianta continuar.
-            if not sucesso:
+            if not success:
                 return None   # emparelhamento perfeito impossivel
 
-        # Todos os N atiradores foram emparelhados. O match_para
+        # Todos os N atiradores foram emparelhados. O match_to
         # esta no sentido "alvo -> quem atira nele"; a saida pede
         # "jogador -> em quem ele atira", entao invertemos.
         assign = [None] * self.n
-        for idx_alvo in range(self.n, 2 * self.n):
-            atirador = self.match_para[idx_alvo]
-            if atirador is not None:
-                jogador_alvo = idx_alvo - self.n + 1   # indice -> jogador
-                assign[atirador] = jogador_alvo
+        for target_idx in range(self.n, 2 * self.n):
+            shooter = self.match_to[target_idx]
+            if shooter is not None:
+                target_player = target_idx - self.n + 1   # indice -> jogador
+                assign[shooter] = target_player
 
         return assign
 
     # -------------------------------------------------------------
     # 3. BUSCA RECURSIVA DO CAMINHO AUMENTANTE
     # -------------------------------------------------------------
-    def _tentar_caminho_aumentante(self, atirador, visitado):
+    def _try_path(self, shooter, visited):
         """
-        Tenta arranjar um alvo para `atirador`, nem que para isso
+        Tenta arranjar um alvo para `shooter`, nem que para isso
         precise deslocar o dono atual de um alvo para outro alvo
         (e assim por diante, em cascata).
 
-        `visitado` e o MESMO conjunto em todas as chamadas recursivas
-        de uma rodada (criado em `resolver`).
+        `visited` e o MESMO conjunto em todas as chamadas recursivas
+        de uma rodada (criado em `resolve`).
 
         Retorna True se um caminho aumentante foi encontrado e o
         emparelhamento foi atualizado ao longo dele; False caso
@@ -129,35 +129,35 @@ class KuhnMatcher:
         # Percorre os alvos que o atirador enxerga, na ordem da
         # lista de adjacencia (Bag do algs4: a ultima aresta inserida
         # e a primeira consultada).
-        for alvo in self.G.adj[atirador]:
+        for target in self.G.adj[shooter]:
 
             # Alvo ja tentado nesta rodada (por este atirador ou por
             # alguem acima na pilha de recursao): pula. Sem isso, dois
             # atiradores poderiam "tomar" o alvo um do outro para sempre.
-            if alvo in visitado:
+            if target in visited:
                 continue
-            visitado.add(alvo)
+            visited.add(target)
 
-            ocupante_atual = self.match_para[alvo]
+            owner = self.match_to[target]
 
             # Duas formas de ficar com o alvo:
             #   - ele esta livre (None); por curto-circuito do `or`,
             #     a recursao nem e chamada; ou
             #   - ele esta ocupado, mas o dono atual consegue trocar
-            #     de alvo: chamada recursiva para o ocupante_atual,
-            #     reaproveitando o mesmo `visitado`.
-            if ocupante_atual is None or self._tentar_caminho_aumentante(
-                ocupante_atual, visitado
+            #     de alvo: chamada recursiva para o owner,
+            #     reaproveitando o mesmo `visited`.
+            if owner is None or self._try_path(
+                owner, visited
             ):
                 # Executado na VOLTA da recursao: cada nivel assume o
                 # alvo que o nivel de baixo acabou de liberar. Isso
                 # inverte as arestas do caminho aumentante e aumenta
                 # o emparelhamento em exatamente 1.
-                self.match_para[alvo] = atirador
+                self.match_to[target] = shooter
                 return True
 
             # O dono atual nao conseguiu trocar: tenta o proximo alvo.
 
-        # Nenhum alvo da lista funcionou: quem chamou (o resolver ou
+        # Nenhum alvo da lista funcionou: quem chamou (o resolve ou
         # o nivel de cima da recursao) recebe False e segue adiante.
         return False

@@ -36,7 +36,7 @@ class LadderDFS:
     (marked[]) e registra o predecessor (edge_to[]) para reconstrução
     de caminhos. A lógica de marcação/recursão foi mantida idêntica;
     a única adição é a variável acumuladora `maior_andar`, que
-    converte cada índice visitado de volta ao andar original (via
+    converte cada índice target de volta ao andar original (via
     LadderSymbolGraph.name) e mantém o maior valor encontrado.
 
     ATENÇÃO — limitação herdada da implementação de referência: por

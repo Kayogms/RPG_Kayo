@@ -89,7 +89,7 @@ class ValidadorBFS:
 # -----------------------------------------------------------------
 # 3. SUBMISSÃO FINAL (AtCoder)
 # -----------------------------------------------------------------
-def resolver_para_submissao(origem=1):
+def resolve_para_submissao(origem=1):
     """
     Pipeline final de resolução, adequado para submissão ao
     AtCoder (sem prints de depuração/validação): usa a BFS de
@@ -124,5 +124,5 @@ def main_desenvolvimento():
 if __name__ == "__main__":
     # Durante o desenvolvimento/testes, usar main_desenvolvimento().
     # Para submissão real ao AtCoder, comentar a linha abaixo e usar
-    # resolver_para_submissao() no lugar (sem prints de validação).
+    # resolve_para_submissao() no lugar (sem prints de validação).
     main_desenvolvimento()

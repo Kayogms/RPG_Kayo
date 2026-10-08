@@ -79,7 +79,7 @@ Ambas resolvem o problema de conectividade, mas a **BFS foi escolhida para a sub
   ```
   RecursionError confirmado: maximum recursion depth exceeded
   ```
-* A mesma entrada, submetida a `resolver_para_submissao` (que usa `BreadthFirstPaths`, iterativa via `deque`), foi resolvida corretamente e com folga de tempo:
+* A mesma entrada, submetida a `resolve_para_submissao` (que usa `BreadthFirstPaths`, iterativa via `deque`), foi resolvida corretamente e com folga de tempo:
   ```
   200001
   tempo: 0.61 s
@@ -143,10 +143,10 @@ O código integrado com a BFS foi submetido na plataforma **AtCoder** e recebeu 
 
 ![Evidência do Accepted AtCoder](../evidencias/Evidencia_1.png)
 
-**Código de submissão final (`marco4_bfs.py` — `resolver_para_submissao`):**
+**Código de submissão final (`marco4_bfs.py` — `resolve_para_submissao`):**
 
 ```python
-def resolver_para_submissao(origem=1):
+def resolve_para_submissao(origem=1):
     edges = LeitorEntrada.ler()
     sg = LadderSymbolGraph(edges, vertice_partida=origem)
     G = sg.graph()

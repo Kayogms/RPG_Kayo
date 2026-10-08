@@ -2,7 +2,7 @@
 
 📌 Objetivo do Repositório
 
-Este repositório contém os artefatos e o código-fonte desenvolvidos para o **Trabalho Prático 1 (T1)** da disciplina de Resolução de Problemas com Grafos. O objetivo principal deste projeto é aplicar conceitos práticos de modelagem estrutural e algoritmos de busca em grafos para resolver o problema **"Ladder Takahashi" (AtCoder ABC277 C)**.
+Este repositório contém os artefatos e o código-fonte desenvolvidos para o **Trabalho Prático 1 (T1)** da disciplina de Resolução de Problemas com Grafos. O objetivo principal deste projeto é aplicar conceitos práticos de modelagem estrutural e algoritmos de busca em grafos para resolve o problema **"Ladder Takahashi" (AtCoder ABC277 C)**.
 
 Todo o processo de desenvolvimento está documentado na pasta `acompanhamento/`, dividido em quatro marcos que demonstram a evolução da nossa solução:
 

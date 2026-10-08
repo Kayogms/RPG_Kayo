@@ -15,9 +15,9 @@
 import sys
 
 from grafo_base import (
-    LeitorEntrada,
-    construir_grafo_bipartido,
-    validar_estrutura,
+    InputReader,
+    build_bipartite_graph,
+    validate_structure,
     N_SAMPLE_1,
     EDGES_SAMPLE_1,
 )
@@ -27,35 +27,35 @@ from kuhn_matcher import KuhnMatcher
 def main():
     sys.setrecursionlimit(10000)  # ver nota de recursao em kuhn_matcher.py
 
-    n, edges = LeitorEntrada.ler()
+    n, edges = InputReader.read()
 
     if n == 0:
         print("Entrada vazia.")
         return
 
-    G = construir_grafo_bipartido(n, edges)
+    G = build_bipartite_graph(n, edges)
 
     # Validacao estrutural: so roda de forma significativa quando a
     # entrada e exatamente a instancia pequena do Marco 1.
     if n == N_SAMPLE_1 and set(edges) == set(EDGES_SAMPLE_1):
-        validar_estrutura(G)
+        validate_structure(G)
         print()
 
     matcher = KuhnMatcher(G, n)
-    assign = matcher.resolver()
+    assign = matcher.resolve()
 
     if assign is None:
         print("Impossible")
         return
 
     print("=== Emparelhamento encontrado ===")
-    for jogador in range(1, n + 1):
-        alvo = assign[jogador - 1]
-        print(f"atirador {jogador} -> alvo {alvo}")
+    for player in range(1, n + 1):
+        target = assign[player - 1]
+        print(f"atirador {player} -> alvo {target}")
 
     # Conferencia: todo alvo deve ser usado exatamente uma vez.
-    alvos_usados = sorted(assign)
-    assert alvos_usados == list(range(1, n + 1)), (
+    used_targets = sorted(assign)
+    assert used_targets == list(range(1, n + 1)), (
         "Inconsistencia: nem todo jogador foi usado como alvo "
         "exatamente uma vez."
     )

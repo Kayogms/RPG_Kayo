@@ -33,7 +33,7 @@ O critério usado para reconhecer o emparelhamento perfeito vem da teoria de Ber
 
 ## 3. Estado Adicional à Busca
 
-Além da marcação de visitados de uma busca convencional, o critério exige manter duas informações adicionais durante a execução:
+Além da marcação de vértices visitados de uma busca convencional, o critério exige manter duas informações adicionais durante a execução:
 
 | Estado | O que representa | Comportamento |
 |---|---|---|

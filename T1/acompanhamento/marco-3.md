@@ -19,17 +19,17 @@
 
 **Passo a Passo da Travessia:**
 
-1. Partimos do vértice `1`, marcando-o como visitado (`marked[0] = True`) e inicializando `maior_andar = 1`. A chamada recursiva `_dfs(G, 0)` é iniciada.
-2. Dentro da chamada de `1`, percorremos seus vizinhos (`[4]`). O vértice `4` não foi visitado, logo recebe `1` como predecessor (`edge_to`) e a função chama recursivamente `_dfs(G, 4)` — **a pilha de chamadas do Python** desempenha aqui o papel da pilha explícita da versão anterior.
-3. Dentro da chamada de `4`, `maior_andar` é atualizado para `max(1, 4) = 4`. Aqui entra um detalhe decisivo: `algs4.bag.Bag` insere cada novo item **no início** da lista encadeada (`Bag.add`), então a ordem de iteração é o **inverso** da ordem de inserção. Como as arestas `(1,4)`, `(4,3)`, `(4,10)` foram lidas nessa sequência, os vizinhos de `4` ficam armazenados como `[10, 3, 1]`, e não `[1, 3, 10]`. O primeiro vizinho não visitado é, portanto, `10` — a recursão desce em `10` (`_dfs(G, 10)`), atualizando `maior_andar` para `max(4, 10) = 10`.
-4. Dentro da chamada de `10`, `maior_andar` permanece `10`. Seu único vizinho (`4`) já foi visitado — não há para onde avançar, e a função retorna, devolvendo o controle para a chamada de `4`.
-5. De volta em `4`, o próximo vizinho não visitado (na ordem `[10, 3, 1]`) é `3`; a recursão desce em `3` (`_dfs(G, 3)`). `maior_andar` permanece `10`.
-6. Dentro da chamada de `3`, o vizinho não visitado é `8`; a recursão desce em `8` (`_dfs(G, 8)`). `maior_andar` permanece `10`.
-7. Dentro da chamada de `8`, não há vizinhos não visitados — a função retorna, e todas as chamadas recursivas se desenrolam de volta até a chamada original, encerrando a busca com `maior_andar = 10`.
+1. Partimos do vértice `1`, marcando-o como target (`marked[0] = True`) e inicializando `maior_andar = 1`. A chamada recursiva `_dfs(G, 0)` é iniciada.
+2. Dentro da chamada de `1`, percorremos seus vizinhos (`[4]`). O vértice `4` não foi target, logo recebe `1` como predecessor (`edge_to`) e a função chama recursivamente `_dfs(G, 4)` — **a pilha de chamadas do Python** desempenha aqui o papel da pilha explícita da versão anterior.
+3. Dentro da chamada de `4`, `maior_andar` é atualizado para `max(1, 4) = 4`. Aqui entra um detalhe decisivo: `algs4.bag.Bag` insere cada novo item **no início** da lista encadeada (`Bag.add`), então a ordem de iteração é o **inverso** da ordem de inserção. Como as arestas `(1,4)`, `(4,3)`, `(4,10)` foram lidas nessa sequência, os vizinhos de `4` ficam armazenados como `[10, 3, 1]`, e não `[1, 3, 10]`. O primeiro vizinho não target é, portanto, `10` — a recursão desce em `10` (`_dfs(G, 10)`), atualizando `maior_andar` para `max(4, 10) = 10`.
+4. Dentro da chamada de `10`, `maior_andar` permanece `10`. Seu único vizinho (`4`) já foi target — não há para onde avançar, e a função retorna, devolvendo o controle para a chamada de `4`.
+5. De volta em `4`, o próximo vizinho não target (na ordem `[10, 3, 1]`) é `3`; a recursão desce em `3` (`_dfs(G, 3)`). `maior_andar` permanece `10`.
+6. Dentro da chamada de `3`, o vizinho não target é `8`; a recursão desce em `8` (`_dfs(G, 8)`). `maior_andar` permanece `10`.
+7. Dentro da chamada de `8`, não há vizinhos não targets — a função retorna, e todas as chamadas recursivas se desenrolam de volta até a chamada original, encerrando a busca com `maior_andar = 10`.
 
 **Ordem real de visita, confirmada por execução do código (`LadderDFS`):** `1 → 4 → 10 → 3 → 8`.
 
-> **Nota sobre a adaptação:** diferentemente da versão anterior deste documento (que usava uma pilha explícita `pilha = []` sobre uma lista Python comum, preservando a ordem de inserção das arestas), a implementação atual (`LadderDFS`, baseada em `algs4.depth_first_paths.DepthFirstPaths`) é **recursiva** e itera sobre `algs4.bag.Bag`, cuja inserção é LIFO (cada `add()` insere no início). Isso não muda o **resultado final** (conjunto de visitados, predecessores e maior andar continuam corretos), mas muda a **ordem** de exploração dos ramos em relação a uma lista de adjacência que preservasse a ordem de leitura das arestas. Por isso a simulação manual acima difere da versão anterior deste documento (que assumia, incorretamente para esta implementação, a ordem `1 → 4 → 3 → 8 → 10`).
+> **Nota sobre a adaptação:** diferentemente da versão anterior deste documento (que usava uma pilha explícita `pilha = []` sobre uma lista Python comum, preservando a ordem de inserção das arestas), a implementação atual (`LadderDFS`, baseada em `algs4.depth_first_paths.DepthFirstPaths`) é **recursiva** e itera sobre `algs4.bag.Bag`, cuja inserção é LIFO (cada `add()` insere no início). Isso não muda o **resultado final** (conjunto de targets, predecessores e maior andar continuam corretos), mas muda a **ordem** de exploração dos ramos em relação a uma lista de adjacência que preservasse a ordem de leitura das arestas. Por isso a simulação manual acima difere da versão anterior deste documento (que assumia, incorretamente para esta implementação, a ordem `1 → 4 → 3 → 8 → 10`).
 
 ---
 
@@ -37,7 +37,7 @@
 
 **Controle de Estados:**
 
-O controle de visitados é feito por meio de uma **lista booleana indexada** (`marked = [False for _ in range(G.V)]`), herdada diretamente de `algs4.depth_first_paths.DepthFirstPaths`, e não por um `set()` como na versão anterior deste documento. Essa lista é indexada pelo **índice comprimido** de cada andar (0 a `|V|-1`), obtido via `LadderSymbolGraph`, e garante acesso e atualização em tempo $O(1)$.
+O controle de targets é feito por meio de uma **lista booleana indexada** (`marked = [False for _ in range(G.V)]`), herdada diretamente de `algs4.depth_first_paths.DepthFirstPaths`, e não por um `set()` como na versão anterior deste documento. Essa lista é indexada pelo **índice comprimido** de cada andar (0 a `|V|-1`), obtido via `LadderSymbolGraph`, e garante acesso e atualização em tempo $O(1)$.
 
 **Estrutura da Árvore de Busca (DFS Tree):**
 
@@ -55,11 +55,11 @@ O rastreio gerado pela classe `LadderDFS` (definida em `marco3_dfs.py`, adaptada
 
 | Vértice (Andar) | Ordem de visita | Predecessor na DFS | Status de Alcançabilidade (`has_path_to`) |
 | :--------------: | :-------------: | :----------------: | :------------------------------------------: |
-|        1        |       1º       | `None` (Origem) |                   Visitado                   |
-|        4        |       2º       |         1         |                   Visitado                   |
-|        10        |       3º       |         4         |                   Visitado                   |
-|        3        |       4º       |         4         |                   Visitado                   |
-|        8        |       5º       |         3         |                   Visitado                   |
+|        1        |       1º       | `None` (Origem) |                   target                   |
+|        4        |       2º       |         1         |                   target                   |
+|        10        |       3º       |         4         |                   target                   |
+|        3        |       4º       |         4         |                   target                   |
+|        8        |       5º       |         3         |                   target                   |
 
 ### 3.1 Validação Cruzada com UF e CC (Oráculos)
 

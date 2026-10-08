@@ -37,11 +37,11 @@ class Graph:
 # =================================================================
 # 2. LEITURA E REPRESENTAÇÃO COMPUTACIONAL (GRAFO BIPARTIDO)
 # =================================================================
-class LeitorEntrada:
+class InputReader:
     """Leitura de alta performance de toda a entrada padrão."""
 
     @staticmethod
-    def ler():
+    def read():
         data = sys.stdin.read().lstrip('\ufeff').split()
         if not data:
             return 0, []
@@ -60,7 +60,7 @@ class LeitorEntrada:
         return n, edges
 
 
-def construir_grafo_bipartido(n: int, edges: list):
+def build_bipartite_graph(n: int, edges: list):
     """
     Constrói o grafo bipartido de tamanho 2N:
         - Atiradores (jogadores 1..N): índices 0 .. N-1
@@ -68,10 +68,10 @@ def construir_grafo_bipartido(n: int, edges: list):
     """
     G = Graph(2 * n)
     for u, v in edges:
-        atirador_u, atirador_v = u - 1, v - 1
-        alvo_u, alvo_v = n + (u - 1), n + (v - 1)
-        G.add_edge(atirador_u, alvo_v)
-        G.add_edge(atirador_v, alvo_u)
+        shooter_u, shooter_v = u - 1, v - 1
+        target_u, target_v = n + (u - 1), n + (v - 1)
+        G.add_edge(shooter_u, target_v)
+        G.add_edge(shooter_v, target_u)
     return G
 
 
@@ -87,48 +87,48 @@ class KuhnMatcher:
     def __init__(self, G: Graph, n: int):
         self.G = G
         self.n = n
-        # match_para[alvo] = índice do atirador que está casando com esse alvo
-        self.match_para = [None] * (2 * n)
+        # match_to[target_idx] = índice do shooter que está casando com esse alvo
+        self.match_to = [None] * (2 * n)
 
-    def _tentar_caminho_aumentante(self, atirador: int, visitado: set) -> bool:
+    def _try_path(self, shooter: int, visited: set) -> bool:
         """
         Busca em profundidade para encontrar um caminho aumentante a partir de
         um atirador livre, desalocando e realocando em cascata se necessário.
         """
-        for alvo in self.G.adj[atirador]:
-            if alvo in visitado:
+        for target in self.G.adj[shooter]:
+            if target in visited:
                 continue
-            visitado.add(alvo)
+            visited.add(target)
 
-            ocupante_atual = self.match_para[alvo]
+            owner = self.match_to[target]
             # Se o alvo está vago OU o ocupante atual puder ser deslocado:
-            if ocupante_atual is None or self._tentar_caminho_aumentante(
-                ocupante_atual, visitado
+            if owner is None or self._try_path(
+                owner, visited
             ):
-                self.match_para[alvo] = atirador
+                self.match_to[target] = shooter
                 return True
 
         return False
 
-    def resolver(self):
+    def resolve(self):
         """
         Executa a busca para todos os N atiradores.
         Retorna:
             list[int] de tamanho N com os alvos atribuídos (1-indexados)
             ou None caso seja impossível atingir emparelhamento perfeito.
         """
-        for atirador in range(self.n):
-            visitado = set()
-            if not self._tentar_caminho_aumentante(atirador, visitado):
+        for shooter in range(self.n):
+            visited = set()
+            if not self._try_path(shooter, visited):
                 return None  # Emparelhamento de tamanho N é impossível
 
         # Reconstrói a atribuição final: para cada atirador, quem ele acertou
         assign = [None] * self.n
-        for idx_alvo in range(self.n, 2 * self.n):
-            atirador = self.match_para[idx_alvo]
-            if atirador is not None:
-                jogador_alvo = idx_alvo - self.n + 1
-                assign[atirador] = jogador_alvo
+        for target_idx in range(self.n, 2 * self.n):
+            shooter = self.match_to[target_idx]
+            if shooter is not None:
+                target_player = target_idx - self.n + 1
+                assign[shooter] = target_player
 
         return assign
 
@@ -137,21 +137,21 @@ class KuhnMatcher:
 # 4. PONTO DE ENTRADA PARA O JUIZ ONLINE
 # =================================================================
 def main():
-    n, edges = LeitorEntrada.ler()
+    n, edges = InputReader.read()
     if n == 0:
         print("Impossible")
         return
 
-    G = construir_grafo_bipartido(n, edges)
+    G = build_bipartite_graph(n, edges)
     matcher = KuhnMatcher(G, n)
-    assign = matcher.resolver()
+    assign = matcher.resolve()
 
     if assign is None:
         print("Impossible")
         return
 
     # Escrita rápida em stdout
-    sys.stdout.write("\n".join(str(alvo) for alvo in assign) + "\n")
+    sys.stdout.write("\n".join(str(target) for target in assign) + "\n")
 
 
 if __name__ == "__main__":

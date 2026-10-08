@@ -37,7 +37,7 @@ from algs4.graph import Graph
 # -----------------------------------------------------------------
 # 1. LEITURA DA ENTRADA
 # -----------------------------------------------------------------
-class LeitorEntrada:
+class InputReader:
     """
     Le a entrada padrao no formato definido no Marco 1:
         N M
@@ -48,7 +48,7 @@ class LeitorEntrada:
     """
 
     @staticmethod
-    def ler(stream=None):
+    def read(stream=None):
         """
         Retorna (N, edges), onde edges e uma lista de tuplas
         (u, v) com os jogadores 1-indexados, exatamente como
@@ -77,7 +77,7 @@ class LeitorEntrada:
 # -----------------------------------------------------------------
 # 2. CONSTRUCAO DO GRAFO BIPARTIDO (algs4.graph.Graph)
 # -----------------------------------------------------------------
-def construir_grafo_bipartido(n, edges):
+def build_bipartite_graph(n, edges):
     """
     Constroi o grafo bipartido atirador/alvo a partir da lista de
     arestas de visibilidade, usando algs4.graph.Graph sem nenhuma
@@ -98,11 +98,11 @@ def construir_grafo_bipartido(n, edges):
     G = Graph(2 * n)
 
     for u, v in edges:
-        atirador_u, atirador_v = u - 1, v - 1
-        alvo_u, alvo_v = n + (u - 1), n + (v - 1)
+        shooter_u, shooter_v = u - 1, v - 1
+        target_u, target_v = n + (u - 1), n + (v - 1)
 
-        G.add_edge(atirador_u, alvo_v)   # u pode atirar em v
-        G.add_edge(atirador_v, alvo_u)   # v pode atirar em u
+        G.add_edge(shooter_u, target_v)   # u pode atirar em v
+        G.add_edge(shooter_v, target_u)   # v pode atirar em u
 
     return G
 
@@ -116,7 +116,7 @@ EDGES_SAMPLE_1 = [(1, 2), (2, 3), (3, 4), (4, 1)]
 
 # Vizinhos esperados de cada ATIRADOR (jogador 1-indexado -> alvos
 # alcancaveis, 1-indexados), derivados diretamente da entrada.
-ESPERADO_SAMPLE_1 = {
+EXPECTED_SAMPLE_1 = {
     1: {2, 4},
     2: {1, 3},
     3: {2, 4},
@@ -124,19 +124,19 @@ ESPERADO_SAMPLE_1 = {
 }
 
 
-def validar_estrutura(G, n=N_SAMPLE_1, esperado=None):
+def validate_structure(G, n=N_SAMPLE_1, expected=None):
     """
     Confere a lista de adjacencia (Graph/Bag) de cada atirador
     contra os alvos esperados na instancia pequena do Marco 1.
     """
-    esperado = esperado or ESPERADO_SAMPLE_1
+    expected = expected or EXPECTED_SAMPLE_1
 
-    for jogador, alvos_esperados in esperado.items():
-        idx_atirador = jogador - 1
-        alvos_obtidos = {w - n + 1 for w in G.adj[idx_atirador]}
-        assert alvos_obtidos == alvos_esperados, (
-            f"Falha na validacao estrutural: atirador {jogador} - "
-            f"esperado {alvos_esperados}, obtido {alvos_obtidos}"
+    for player, expected_targets in expected.items():
+        shooter_idx = player - 1
+        obtained_targets = {w - n + 1 for w in G.adj[shooter_idx]}
+        assert obtained_targets == expected_targets, (
+            f"Falha na validacao estrutural: atirador {player} - "
+            f"esperado {expected_targets}, obtido {obtained_targets}"
         )
 
     print("[OK] Validacao estrutural (lista de adjacencia) - Sample 1")

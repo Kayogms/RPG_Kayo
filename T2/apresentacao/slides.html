@@ -353,7 +353,7 @@
             O emparelhamento exige:
           </p>
           <ul style="font-size: 20px; margin-top: 8px;">
-            <li>Marcação temporária (<span class="badge-code">visitado</span>) zerada a cada atirador;</li>
+            <li>Marcação temporária (<span class="badge-code">target</span>) zerada a cada atirador;</li>
             <li>Lógica de <strong>desalocação e realocação recursiva</strong> ao colidir com alvo ocupado.</li>
           </ul>
         </div>
@@ -367,7 +367,7 @@
           </div>
           <ul>
             <li><strong>Classe dedicada:</strong> criada para implementar o Algoritmo de Kuhn com DFS sobre a estrutura <span class="badge-code">Graph</span>.</li>
-            <li><strong>Estado global:</strong> <span class="badge-code">match_para[alvo]</span> mantém o emparelhamento construído.</li>
+            <li><strong>Estado global:</strong> <span class="badge-code">match_para[t]</span> mantém o emparelhamento construído.</li>
             <li><strong>Recursão:</strong> tenta realocar o ocupante atual antes de ceder o alvo para o novo atirador.</li>
           </ul>
         </div>

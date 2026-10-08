@@ -64,9 +64,9 @@ Essa corrente de trocas é chamada de **caminho aumentante**. Toda vez que acham
 
 ### 2.4 Adaptação Prevista: `KuhnMatcher`
 A estratégia prevê uma classe dedicada chamada `KuhnMatcher` que recebe o `Graph` e gerencia:
-* O vetor `match_para` (de tamanho $2N$), registrando qual atirador está associado a cada alvo;
-* A busca recursiva `_tentar_caminho_aumentante(atirador, visitado)`;
-* O método `resolver()` que tenta emparelhar os atiradores de $1$ a $N$.
+* O vetor `match_to` (de tamanho $2N$), registrando qual atirador está associado a cada alvo;
+* A busca recursiva `_try_path(shooter, visited)`;
+* O método `resolve()` que tenta emparelhar os atiradores de $1$ a $N$.
 
 ---
 
@@ -97,9 +97,9 @@ Considerando a ordem em que as arestas foram inseridas e o comportamento LIFO da
 
 ### 3.3 Tabela de Rastreamento Manual do Algoritmo de Kuhn
 
-Estado inicial: todos os alvos estão livres (`match_para` com todos os valores vazios).
+Estado inicial: todos os alvos estão livres (`match_to` com todos os valores vazios).
 
-| Passo | Atirador da Vez | Alvo Consultado | Situação Encontrada | Decisão do Algoritmo / Ação | Caminho Aumentante Encontrado | Estado Atual do Emparelhamento (`match_para`) |
+| Passo | Atirador da Vez | Alvo Consultado | Situação Encontrada | Decisão do Algoritmo / Ação | Caminho Aumentante Encontrado | Estado Atual do Emparelhamento (`match_to`) |
 |:---:|:---:|:---:|:---|:---|:---:|:---|
 | **1** | **$A_1$** (Jogador 1) | **$B_4$** (Jogador 4) | Livre | $A_1$ assume o alvo $B_4$ diretamente. | $A_1 \to B_4$ | $\{A_1 \to B_4\}$ |
 | **2** | **$A_2$** (Jogador 2) | **$B_3$** (Jogador 3) | Livre | $A_2$ assume o alvo $B_3$ diretamente. | $A_2 \to B_3$ | $\{A_1 \to B_4, \; A_2 \to B_3\}$ |
@@ -126,7 +126,7 @@ A complexidade de pior caso do Algoritmo de Kuhn é obtida diretamente multiplic
 1. **Loop Principal ($O(V)$ iterações):**  
    O algoritmo passa por cada um dos $N$ atiradores. Como temos $N$ atiradores em um universo de $V = 2N$ vértices, isso representa $O(V)$ chamadas externas.
 2. **Busca DFS por Tentativa ($O(E)$ por atirador):**  
-   Dentro de cada tentativa, o conjunto `visitado` garante que **nenhum alvo seja avaliado duas vezes**. Consequentemente, nenhuma aresta de tiro do grafo é percorrida mais de uma vez ao longo daquela tentativa. O custo de uma DFS que não repete arestas é proporcional ao número total de arestas: $O(E)$.
+   Dentro de cada tentativa, o conjunto `visited` garante que **nenhum alvo seja avaliado duas vezes**. Consequentemente, nenhuma aresta de tiro do grafo é percorrida mais de uma vez ao longo daquela tentativa. O custo de uma DFS que não repete arestas é proporcional ao número total de arestas: $O(E)$.
 
 Multiplicando as duas partes:
 $$\text{Tempo Total} = O(V) \times O(E) = \mathbf{O(V \cdot E)}$$
@@ -143,8 +143,8 @@ Para uma análise rigorosa, separa-se a memória fixa do grafo da memória de ex
 * **Consumo do Grafo:** $O(V + E) = \mathbf{O(N + M)}$ (ocupa menos de 2 MB de RAM para o caso máximo).
 
 #### B. Memória Auxiliar do Algoritmo (`KuhnMatcher`):
-1. **Vetor de Casamento (`match_para`):** tamanho fixo $2N \implies O(N)$.
-2. **Conjunto de Visitados (`visitado`):** armazena até $N$ alvos por tentativa $\implies O(N)$.
+1. **Vetor de Casamento (`match_to`):** tamanho fixo $2N \implies O(N)$.
+2. **Conjunto de alvos visitados (`visited`):** armazena até $N$ alvos por tentativa $\implies O(N)$.
 3. **Pilha de Recursão da DFS:** se houver uma corrente de trocas envolvendo todos os atiradores em fila, a profundidade máxima de chamadas na pilha do Python será de $N \implies O(N)$.
 * **Consumo da Memória Auxiliar:** $\mathbf{O(N)}$.
 
