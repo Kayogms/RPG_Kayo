@@ -21,7 +21,7 @@ sys.setrecursionlimit(200000)
 # 1. CLASSES DE REFERÊNCIA (Substituindo o pacote algs4)
 # =================================================================
 class Graph:
-    """Implementação minimalista equivalente ao algs4.graph.Graph."""
+
 
     def __init__(self, V: int):
         self.V = V
@@ -38,7 +38,7 @@ class Graph:
 # 2. LEITURA E REPRESENTAÇÃO COMPUTACIONAL (GRAFO BIPARTIDO)
 # =================================================================
 class InputReader:
-    """Leitura de alta performance de toda a entrada padrão."""
+
 
     @staticmethod
     def read():
@@ -61,11 +61,7 @@ class InputReader:
 
 
 def build_bipartite_graph(n: int, edges: list):
-    """
-    Constrói o grafo bipartido de tamanho 2N:
-        - Atiradores (jogadores 1..N): índices 0 .. N-1
-        - Alvos      (jogadores 1..N): índices N .. 2N-1
-    """
+
     G = Graph(2 * n)
     for u, v in edges:
         shooter_u, shooter_v = u - 1, v - 1
@@ -79,29 +75,21 @@ def build_bipartite_graph(n: int, edges: list):
 # 3. ALGORITMO DE EMPARELHAMENTO BIPARTIDO (KUHN)
 # =================================================================
 class KuhnMatcher:
-    """
-    Algoritmo de Kuhn para Emparelhamento Máximo em Grafo Bipartido.
-    Utiliza DFS para encontrar caminhos aumentantes alternados.
-    """
+
 
     def __init__(self, G: Graph, n: int):
         self.G = G
         self.n = n
-        # match_to[target_idx] = índice do shooter que está casando com esse alvo
         self.match_to = [None] * (2 * n)
 
     def _try_path(self, shooter: int, visited: set) -> bool:
-        """
-        Busca em profundidade para encontrar um caminho aumentante a partir de
-        um atirador livre, desalocando e realocando em cascata se necessário.
-        """
+
         for target in self.G.adj[shooter]:
             if target in visited:
                 continue
             visited.add(target)
 
             owner = self.match_to[target]
-            # Se o alvo está vago OU o ocupante atual puder ser deslocado:
             if owner is None or self._try_path(
                 owner, visited
             ):
@@ -111,12 +99,7 @@ class KuhnMatcher:
         return False
 
     def resolve(self):
-        """
-        Executa a busca para todos os N atiradores.
-        Retorna:
-            list[int] de tamanho N com os alvos atribuídos (1-indexados)
-            ou None caso seja impossível atingir emparelhamento perfeito.
-        """
+
         for shooter in range(self.n):
             visited = set()
             if not self._try_path(shooter, visited):

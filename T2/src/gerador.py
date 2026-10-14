@@ -25,34 +25,20 @@ import sys
 
 
 def generate_sample1():
-    """Instancia do Marco 1: ciclo de 4 jogadores (garante Accepted)."""
     n = 4
     edges = [(1, 2), (2, 3), (3, 4), (4, 1)]
     return n, edges
 
 
 def generate_impossible():
-    """
-    Caso proposital sem emparelhamento perfeito: os jogadores 2 e 3
-    so enxergam o jogador 1, entao ambos disputariam o mesmo (unico)
-    alvo possivel.
-    """
+
     n = 3
     edges = [(1, 2), (1, 3)]
     return n, edges
 
 
 def generate_stress(n=1000, m=5000, seed=None):
-    """
-    Gera um caso de estresse com N e M proximos do limite maximo
-    das restricoes do problema (N <= 1000, M <= 5000).
 
-    Garante que existe emparelhamento perfeito: comeca com um ciclo
-    hamiltoniano (1-2, 2-3, ..., N-1), que sozinho ja garante uma
-    solucao valida (M = N arestas), e completa o restante das
-    arestas (ate M) com pares aleatorios distintos, sem repetir
-    pares ja usados.
-    """
     if seed is not None:
         random.seed(seed)
 
@@ -68,14 +54,11 @@ def generate_stress(n=1000, m=5000, seed=None):
 
     edges = set()
 
-    # Ciclo base: garante que 1..N e um componente conexo com
-    # emparelhamento perfeito trivial (vizinho seguinte no ciclo).
     for i in range(1, n + 1):
         j = i + 1 if i < n else 1
         pair = (min(i, j), max(i, j))
         edges.add(pair)
 
-    # Completa ate M arestas com pares aleatorios adicionais.
     while len(edges) < m:
         u = random.randint(1, n)
         v = random.randint(1, n)

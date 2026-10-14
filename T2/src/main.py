@@ -2,13 +2,6 @@
 =================================================================
  main.py
  Ponto de entrada de DESENVOLVIMENTO - Kattis Paintball (T2).
-
- Executa: leitura da entrada, construcao do grafo bipartido,
- validacao estrutural (Sample 1, quando aplicavel) e resolucao
- via KuhnMatcher, com saida detalhada para conferencia manual.
-
- NAO usar este arquivo para submissao ao Kattis - use
- main_submissao.py, que nao imprime nada alem da resposta exigida.
 =================================================================
 """
 
