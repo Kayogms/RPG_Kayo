@@ -11,29 +11,6 @@
  atirador, e (2) uma recursao que decide desalocar o emparelhamento
  atual de um alvo ocupado, em vez de apenas decidir "para onde ir"
  entre vizinhos nao targets.
-
- O padrao recursivo com vetor de marcacao (visited) foi mantido
- como inspiracao estrutural da DFS classica, mas a logica de
- decisao dentro da recursao foi escrita integralmente para este
- problema (ver Marco 2, Secoes 2 e 3, para a fundamentacao teorica
- de caminhos aumentantes).
-
- ATENCAO - recursao e o limite do Python: com N ate 1000, uma
- cadeia de deslocamentos (ver Marco 2, Secao 5) pode, em tese,
- encostar no limite padrao de recursao do Python (1000 chamadas).
- Por seguranca, o limite e elevado explicitamente antes da
- execucao (ver main.py / main_submissao.py), registrando essa
- decisao de forma explicita, no mesmo espirito da licao aprendida
- no T1 sobre o RecursionError da DFS em componentes "em cadeia".
-
- ORDEM DE LEITURA (= ordem de execucao):
-   1. __init__                    prepara o estado (roda 1 vez)
-   2. resolve                    laco das rodadas, 1 por atirador
-   3. _try_path  busca recursiva chamada pelo
-                                  resolve a cada rodada
- Quem dispara tudo e o main.py:
-     matcher = KuhnMatcher(G, n)   -> __init__
-     assign = matcher.resolve()   -> resolve -> _tentar_...
 =================================================================
 """
 
