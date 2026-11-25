@@ -7,6 +7,7 @@
 | Versão | Data | Descrição das Alterações | Grupo |
 |:-------|:-----------|:------------------------------------------------------------------------------------------------|:------|
 | 1.0 | 18/11/2026 | Criação do documento; formulação do problema de caminhos mínimos, modelagem do grafo, instância pequena e hipótese inicial de solução | E |
+| 1.1 | 25/11/2026 | Unificação da instância pequena com os Marcos 2 e 3; revisão da avaliação das classes de referência em Python (`algs4`) e adoção da implementação limpa com `heapq` | E |
 
 ---
 
@@ -20,7 +21,7 @@ Existem $N$ cidades conectadas por $M$ voos, e cada voo possui uma origem, um de
 
 **Entrada:**
 
-```
+```text
 N M
 a1 b1 c1
 a2 b2 c2
@@ -76,36 +77,36 @@ Este marco mobiliza a modelagem de **caminhos mínimos em grafos direcionados e 
 
 **Caso de teste (4 cidades e 5 voos):**
 
-```
+```text
 4 5
-1 2 10
-1 3 3
-3 4 4
+1 2 6
+1 3 2
+3 2 1
 2 4 2
-1 4 12
+3 4 10
 ```
 
 **Lista de adjacência ponderada (saídas de cada cidade):**
 
 | Cidade | Voos de saída (destino, distância) |
 |:---|:---|
-| **1** | (2, 10), (3, 3), (4, 12) |
+| **1** | (2, 6), (3, 2) |
 | **2** | (4, 2) |
-| **3** | (4, 4) |
+| **3** | (2, 1), (4, 10) |
 | **4** | Nenhum |
 
 **Resultado esperado:**
 
-```
-0 10 3 7
+```text
+0 3 2 5
 ```
 
 **Explicação:**
 
 - **Cidade 1:** distância `0`, porque é a origem.
-- **Cidade 2:** o voo direto $1 \to 2$ custa `10`; não há alternativa mais barata nessa instância.
-- **Cidade 3:** o voo direto $1 \to 3$ custa `3`.
-- **Cidade 4:** existem o voo direto $1 \to 4$, de custo `12`, e o trajeto $1 \to 2 \to 4$, de custo $10+2=12$. Entretanto, o caminho $1 \to 3 \to 4$ custa $3+4=7$, sendo o menor.
+- **Cidade 2:** o voo direto $1 \to 2$ custa `6`, mas o trajeto $1 \to 3 \to 2$ custa $2 + 1 = 3$, sendo o menor.
+- **Cidade 3:** o voo direto $1 \to 3$ custa `2`.
+- **Cidade 4:** o caminho $1 \to 3 \to 4$ custa `12` e $1 \to 2 \to 4$ custa `8`, mas o trajeto $1 \to 3 \to 2 \to 4$ custa $2 + 1 + 2 = 5$, sendo o menor.
 
 **Observação sobre a saída:** para cada cidade, imprimimos apenas a **menor distância**, mesmo quando diferentes caminhos poderiam produzir o mesmo custo. Não é necessário informar a sequência de cidades percorridas.
 
@@ -117,27 +118,23 @@ Este marco mobiliza a modelagem de **caminhos mínimos em grafos direcionados e 
 
 1. Inicializar as distâncias de todas as cidades com um valor muito grande (infinito), exceto a cidade $1$, cuja distância inicial é `0`.
 2. Inserir a cidade $1$ na fila de prioridade com distância `0`.
-3. Retirar a cidade de menor distância conhecida e examinar seus voos de saída.
-4. Para cada voo $u \to v$ de peso $c$, verificar se $dist[u] + c < dist[v]$. Se for verdade, atualizar $dist[v]$ e a prioridade correspondente. Esse processo é chamado de **relaxamento de aresta**.
+3. Retirar a cidade de menor distância conhecida e examinar seus voos de saída (descartando entradas desatualizadas caso já exista distância menor registrada).
+4. Para cada voo $u \to v$ de peso $c$, verificar se $dist[u] + c < dist[v]$. Se for verdade, atualizar $dist[v]$ e inserir o novo par na fila de prioridade. Esse processo é chamado de **relaxamento de aresta**.
 5. Continuar até que não existam mais cidades a processar e imprimir as menores distâncias na ordem de $1$ a $N$.
 
-**Complexidade esperada:** $O((V+E)\log V)$ com uma fila de prioridade indexada e listas de adjacência; o armazenamento do grafo e das distâncias exige $O(V+E)$ de memória. Essa abordagem é adequada para os limites de até $10^5$ cidades e $2\cdot10^5$ voos.
+**Complexidade esperada:** $O((V+E)\log E)$ usando fila de prioridade binária com descarte preguiçoso (*lazy deletion*) e listas de adjacência; o armazenamento do grafo e das distâncias exige $O(V+E)$ de memória. Essa abordagem é adequada para os limites de até $10^5$ cidades e $2\cdot10^5$ voos.
 
-**Cuidado com os valores:** como uma aresta pode ter peso de até $10^9$ e um caminho pode acumular muitas arestas, a distância total pode ultrapassar o limite de um inteiro de 32 bits. Em Java, uma implementação com distâncias inteiras deve usar **`long`** (e não `int`) para os custos acumulados.
+**Cuidado com os valores:** como uma aresta pode ter peso de até $10^9$ e um caminho pode acumular muitas arestas, a distância total pode chegar à ordem de $10^{14}$, ultrapassando o limite de inteiros de 32 bits. Em Python, o tipo `int` possui precisão arbitrária, evitando *overflow* e dispensando conversões de ponto flutuante na saída; para representar o infinito inicial, utiliza-se uma constante inteira como `10**18`.
 
 ### Avaliação do reaproveitamento das classes de referência do professor
 
-Assim como na AV2, consideramos o reaproveitamento de classes da biblioteca `algs4`. Para este problema, a representação precisa preservar **direção e peso**; portanto, as classes genéricas de grafos não são suficientes por si só.
+Avaliamos o código de referência em Python (`algs4`) disponibilizado na disciplina. Embora a arquitetura conceitual (`EdgeWeightedDigraph` + `DijkstraSP`) corresponda exatamente ao problema, a inspeção do código revelou gargalos de desempenho e inconsistências que inviabilizam o uso direto sob o limite de 1 segundo do CSES:
 
-| Classe da `algs4` | Reaproveitável neste problema? | Justificativa |
-|---|---|---|
-| `EdgeWeightedDigraph` | **Sim.** | Representa um grafo direcionado e ponderado por meio de listas de adjacência. É apropriada para armazenar as cidades e os voos, inclusive arestas paralelas. Os índices da biblioteca começam em `0`, então as cidades da entrada podem ser convertidas de `1..N` para `0..N-1`. |
-| `DirectedEdge` | **Sim.** | Representa cada voo com origem, destino e peso. É utilizada em conjunto com `EdgeWeightedDigraph`. |
-| `Bag` | **Sim, indiretamente.** | É a estrutura utilizada internamente por `EdgeWeightedDigraph` para armazenar as listas de adjacência. |
-| `DijkstraSP` | **Sim, com atenção à saída.** | Já implementa Dijkstra para grafos ponderados direcionados, calculando os menores caminhos a partir de uma origem. A classe utiliza `double` para as distâncias, enquanto o CSES exige inteiros na saída; será necessário formatar/converter corretamente os resultados. Os limites deste problema permitem representar exatamente essas somas inteiras em `double`, mas uma implementação própria com `long` também é válida. |
-| `IndexMinPQ` | **Sim, caso a busca seja implementada.** | Fornece uma fila de prioridade mínima indexada, útil para selecionar a próxima cidade e atualizar sua prioridade durante os relaxamentos. Uma alternativa é usar `PriorityQueue` do Java, descartando entradas desatualizadas. |
-| `Graph`, `Digraph` | **Não diretamente.** | `Graph` não preserva a direção; `Digraph` preserva a direção, mas não armazena pesos nas arestas. O problema precisa das duas características. |
-| `DepthFirstPaths`, `BreadthFirstPaths`, `UF`, `CC` | **Não aplicável como solução.** | Essas classes tratam de percursos e conectividade. A BFS tradicional, por exemplo, minimiza o número de arestas em grafos não ponderados, e não a soma das distâncias dos voos. |
-| `SymbolGraph`, `ST` | **Não necessário.** | As cidades já vêm identificadas por números consecutivos, dispensando uma tabela de símbolos para traduzir nomes. |
+| Classe da `algs4` | Reaproveitável diretamente? | Justificativa técnica |
+|:---|:---|:---|
+| `EdgeWeightedDigraph`, `Bag`, `DirectedEdge` | **Não diretamente (reimplementada de forma enxuta).** | Instanciar até $2\cdot10^5$ objetos `DirectedEdge` dentro de nós de lista encadeada (`Bag`) gera alto custo de memória e iteração em Python. A interface `EdgeWeightedDigraph` será mantida de forma limpa usando listas nativas de tuplas `(destino, peso)`. |
+| `DijkstraSP` | **Não diretamente (reimplementada de forma limpa).** | A referência inicializa distâncias com `POSITIVE_INFINITY = 999999.0` (valor menor que o peso máximo de um único voo, $10^9$), usa `float` e mantém `edgeTo` (desnecessário, pois o CSES não pede o caminho). |
+| `IndexMinPQ` e `MinPQ` | **Não.** | Ambas usam `self.pq = self.pq[:-1]` no `del_min()`, copiando a lista inteira em $O(N)$ por remoção. Além disso, `IndexMinPQ` possui erro em `contains()` (busca o índice na lista de chaves) e não atualiza `qp` em `swim()`/`sink()`. Serão substituídas pelo módulo nativo `heapq` (implementado em C) com descarte de entradas desatualizadas (*lazy deletion*). |
+| `Graph`, `Digraph`, `BreadthFirstPaths`, `DepthFirstPaths`, `UF`, `CC`, `ST` | **Não aplicável.** | Não modelam grafos direcionados com pesos ou resolvem outras classes de problemas (conectividade, alcançabilidade não ponderada ou tabela de símbolos). |
 
-**Conclusão da avaliação:** `EdgeWeightedDigraph` e `DirectedEdge` atendem à representação do grafo. Para calcular os caminhos mínimos, é possível reaproveitar `DijkstraSP` (adaptando a saída ao formato do CSES) ou implementar Dijkstra com distâncias `long` e uma fila de prioridade. A decisão de implementação e seus detalhes ficam para o Marco 2.
+**Conclusão da avaliação:** a solução adotará uma implementação limpa em Python inspirada na arquitetura de `EdgeWeightedDigraph` e `DijkstraSP`, utilizando listas de adjacência com tuplas, inteiros nativos (`int`) e fila de prioridade via `heapq`.

@@ -117,4 +117,4 @@ Ordem de grandeza para o pior caso do problema ($n = 10^5$, $m = 2\cdot10^5$): c
 
 ### Valores das distâncias
 
-Um caminho pode ter até $n - 1$ arestas de peso até $10^9$, então a maior distância possível é da ordem de $10^5 \cdot 10^9 = 10^{14}$. Esse valor não cabe em um inteiro de 32 bits, mas é representado sem perda em inteiros de 64 bits e também em números de ponto flutuante de precisão dupla, que representam inteiros exatamente até cerca de $9\cdot10^{15}$.
+Um caminho pode ter até $n - 1$ arestas de peso até $10^9$, então a maior distância possível é da ordem de $10^5 \cdot 10^9 = 10^{14}$. Esse valor não cabe em um inteiro de 32 bits, mas na implementação em Python é tratado nativamente sem perda de precisão pelo tipo `int` (precisão arbitrária), usando `10**18` como sentinela de infinito.
