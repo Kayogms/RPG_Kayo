@@ -1,4 +1,4 @@
-# Marco 1 — Modelagem: CSES Shortest Routes I (Problema 1671) — AV3
+# Marco 1 — Modelagem: CSES Shortest Routes I (Problema 1671) — T3 (AP3)
 
 **Data de Criação:** 18/11/2026
 
@@ -7,7 +7,7 @@
 | Versão | Data | Descrição das Alterações | Grupo |
 |:-------|:-----------|:------------------------------------------------------------------------------------------------|:------|
 | 1.0 | 18/11/2026 | Criação do documento; formulação do problema de caminhos mínimos, modelagem do grafo, instância pequena e hipótese inicial de solução | E |
-| 1.1 | 25/11/2026 | Unificação da instância pequena com os Marcos 2 e 3; revisão da avaliação das classes de referência em Python (`algs4`) e adoção da implementação limpa com `heapq` | E |
+| 1.1 | 25/11/2026 | Unificação da instância pequena com os Marcos 2 e 3; padronização da linguagem para Python; ajuste de nomenclatura (T2/T3); adequação da Seção 4 como hipótese preliminar | E |
 
 ---
 
@@ -57,19 +57,20 @@ aM bM cM
 
 **Modelagem para caminhos mínimos:**
 
-- **Vértices ($V$):** as $N$ cidades, numeradas de $1$ a $N$; $|V| = N$ (até 100.000).
-- **Arestas ($E$):** para cada linha $(a,b,c)$, cria-se uma aresta $a \to b$ de peso $c$; $|E| = M$ (até 200.000).
+- **Vértices ($V$):** as $N$ cidades, numeradas de $1$ a $N$; $\vert{}V\vert{} = N$ (até 100.000).
+- **Arestas ($E$):** para cada linha $(a,b,c)$, cria-se uma aresta $a \to b$ de peso $c$; $\vert{}E\vert{} = M$ (até 200.000).
 - **Direção:** os deslocamentos devem respeitar o sentido de cada voo; não se cria automaticamente a aresta $b \to a$.
 - **Pesos:** inteiros positivos que representam as distâncias dos voos. O custo de um caminho é a soma dos pesos de suas arestas.
 - **Capacidades:** não se aplicam, pois o problema não envolve limite de fluxo ou quantidade de passageiros.
 - **Arestas paralelas:** podem existir voos diferentes entre o mesmo par ordenado de cidades; cada voo deve ser considerado com seu próprio peso.
+- **Indexação:** as cidades são tratadas de $1$ a $N$, acompanhando diretamente o formato da entrada (com a possibilidade de conversão para $0\ldots N-1$ caso alguma estrutura exija indexação baseada em zero).
 - **Origem:** o vértice $1$.
 
 **Relação com o problema:** para cada cidade $v$, precisamos calcular $dist[v]$, a menor soma de pesos entre a cidade $1$ e $v$. A resposta é o vetor $dist[1], dist[2], \ldots, dist[N]$; o enunciado **não solicita imprimir os caminhos**, apenas seus comprimentos.
 
 ### Resultado de Aprendizagem Aferido
 
-Este marco mobiliza a modelagem de **caminhos mínimos em grafos direcionados e ponderados**. A competência avaliada é transformar uma rede de voos em um grafo, identificar corretamente a direção e o custo das arestas e distinguir **menor custo total** de simples alcançabilidade ou menor número de arestas. Como todos os pesos são positivos, a hipótese de solução é o **Algoritmo de Dijkstra**, apresentado na Seção 4.
+Este marco mobiliza a modelagem de **caminhos mínimos em grafos direcionados e ponderados**. A competência avaliada é transformar uma rede de voos em um grafo, identificar corretamente a direção e o custo das arestas e distinguir **menor custo total** de simples alcançabilidade ou menor número de arestas.
 
 ---
 
@@ -112,29 +113,10 @@ Este marco mobiliza a modelagem de **caminhos mínimos em grafos direcionados e 
 
 ---
 
-## 4. Hipótese Inicial de Solução
+## 4. Hipótese Preliminar de Solução
 
-**Estratégia de resolução:** como o grafo é direcionado, ponderado e possui apenas pesos positivos, a proposta é utilizar o **Algoritmo de Dijkstra** com **lista de adjacência e fila de prioridade mínima**:
+Como o grafo é direcionado, ponderado e possui apenas pesos positivos ($c \ge 1$), a hipótese preliminar é resolver o problema por meio do **Algoritmo de Dijkstra** com lista de adjacência e fila de prioridade mínima, mantendo um vetor de distâncias inicializado com infinito (exceto a origem, com `0`) e relaxando as arestas à medida que cada cidade de menor distância acumulada é processada.
 
-1. Inicializar as distâncias de todas as cidades com um valor muito grande (infinito), exceto a cidade $1$, cuja distância inicial é `0`.
-2. Inserir a cidade $1$ na fila de prioridade com distância `0`.
-3. Retirar a cidade de menor distância conhecida e examinar seus voos de saída (descartando entradas desatualizadas caso já exista distância menor registrada).
-4. Para cada voo $u \to v$ de peso $c$, verificar se $dist[u] + c < dist[v]$. Se for verdade, atualizar $dist[v]$ e inserir o novo par na fila de prioridade. Esse processo é chamado de **relaxamento de aresta**.
-5. Continuar até que não existam mais cidades a processar e imprimir as menores distâncias na ordem de $1$ a $N$.
+**Cuidado com a ordem de grandeza das distâncias:** como cada voo pode custar até $10^9$ e um caminho pode atravessar até $N - 1$ arestas, as distâncias acumuladas podem chegar à ordem de $10^{14}$, ultrapassando o limite de inteiros de 32 bits. Na implementação do grupo em Python, o tipo `int` possui precisão arbitrária e evita *overflow* nativamente, bastando escolher uma sentinela inteira adequada (como `10**18`) para representar o infinito inicial.
 
-**Complexidade esperada:** $O((V+E)\log E)$ usando fila de prioridade binária com descarte preguiçoso (*lazy deletion*) e listas de adjacência; o armazenamento do grafo e das distâncias exige $O(V+E)$ de memória. Essa abordagem é adequada para os limites de até $10^5$ cidades e $2\cdot10^5$ voos.
-
-**Cuidado com os valores:** como uma aresta pode ter peso de até $10^9$ e um caminho pode acumular muitas arestas, a distância total pode chegar à ordem de $10^{14}$, ultrapassando o limite de inteiros de 32 bits. Em Python, o tipo `int` possui precisão arbitrária, evitando *overflow* e dispensando conversões de ponto flutuante na saída; para representar o infinito inicial, utiliza-se uma constante inteira como `10**18`.
-
-### Avaliação do reaproveitamento das classes de referência do professor
-
-Avaliamos o código de referência em Python (`algs4`) disponibilizado na disciplina. Embora a arquitetura conceitual (`EdgeWeightedDigraph` + `DijkstraSP`) corresponda exatamente ao problema, a inspeção do código revelou gargalos de desempenho e inconsistências que inviabilizam o uso direto sob o limite de 1 segundo do CSES:
-
-| Classe da `algs4` | Reaproveitável diretamente? | Justificativa técnica |
-|:---|:---|:---|
-| `EdgeWeightedDigraph`, `Bag`, `DirectedEdge` | **Não diretamente (reimplementada de forma enxuta).** | Instanciar até $2\cdot10^5$ objetos `DirectedEdge` dentro de nós de lista encadeada (`Bag`) gera alto custo de memória e iteração em Python. A interface `EdgeWeightedDigraph` será mantida de forma limpa usando listas nativas de tuplas `(destino, peso)`. |
-| `DijkstraSP` | **Não diretamente (reimplementada de forma limpa).** | A referência inicializa distâncias com `POSITIVE_INFINITY = 999999.0` (valor menor que o peso máximo de um único voo, $10^9$), usa `float` e mantém `edgeTo` (desnecessário, pois o CSES não pede o caminho). |
-| `IndexMinPQ` e `MinPQ` | **Não.** | Ambas usam `self.pq = self.pq[:-1]` no `del_min()`, copiando a lista inteira em $O(N)$ por remoção. Além disso, `IndexMinPQ` possui erro em `contains()` (busca o índice na lista de chaves) e não atualiza `qp` em `swim()`/`sink()`. Serão substituídas pelo módulo nativo `heapq` (implementado em C) com descarte de entradas desatualizadas (*lazy deletion*). |
-| `Graph`, `Digraph`, `BreadthFirstPaths`, `DepthFirstPaths`, `UF`, `CC`, `ST` | **Não aplicável.** | Não modelam grafos direcionados com pesos ou resolvem outras classes de problemas (conectividade, alcançabilidade não ponderada ou tabela de símbolos). |
-
-**Conclusão da avaliação:** a solução adotará uma implementação limpa em Python inspirada na arquitetura de `EdgeWeightedDigraph` e `DijkstraSP`, utilizando listas de adjacência com tuplas, inteiros nativos (`int`) e fila de prioridade via `heapq`.
+A justificativa formal do algoritmo, a comparação com alternativas e a análise de complexidade são detalhadas no **Marco 3**, enquanto a avaliação e adaptação das classes de referência da disciplina ficam registradas nos **Marcos 3 e 4**.

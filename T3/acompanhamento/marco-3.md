@@ -7,6 +7,7 @@
 | Versão | Data | Descrição das Alterações | Grupo |
 |:-------|:-----------|:-------------------------------------------------------------------------------------------------------------------------------------------|:------|
 | 1.0 | 23/11/2026 | Criação do documento: justificativa do Algoritmo de Dijkstra, condições de aplicabilidade, invariante, execução na instância e estimativa de complexidade | E |
+| 1.1 | 25/11/2026 | Atualização do subtópico "Valores das distâncias" para explicitar o uso de inteiros nativos (`int`) em Python com sentinela `10**18` | E |
 
 ---
 

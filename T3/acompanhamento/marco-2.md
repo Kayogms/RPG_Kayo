@@ -1,24 +1,29 @@
-# Marco 2 — Escolha do algoritmo: CSES Shortest Routes I
+# Marco 2 — Representação e Validação: CSES Shortest Routes I (Problema 1671)
 
 **Data de criação:** 18/11/2026  
 **Problema:** CSES Problem Set — Shortest Routes I
 
-## Histórico de versões
+### Histórico de Versões
 
-| Versão | Data | Descrição das alterações | Grupo |
-|---|---|---|---|
+| Versão | Data | Descrição das Alterações | Grupo |
+|:-------|:-----------|:------------------------------------------------------------------------------------------------|:------|
 | 2.0 | 18/11/2026 | Justificativa da lista de adjacência, representação da instância do Marco 1, conferência manual da saída e classificação preliminar do problema. | E |
-| 2.1 | 23/11/2026 | Inclusão da justificativa de escolha do algoritmo (Dijkstra vs. Kruskal/Prim e Ford-Fulkerson/Edmonds-Karp) e da análise de complexidade de pior caso de tempo e espaço. | E |
+| 2.1 | 23/11/2026 | Inclusão da justificativa de escolha do algoritmo e análise de complexidade. | E |
+| 2.2 | 25/11/2026 | Adequação ao escopo do Marco 2 no T3: ajuste do título, inclusão do cálculo de espaço da matriz de adjacência, nota sobre indexação `1..N` e remoção da escolha detalhada/complexidade (consolidadas no Marco 3). | E |
 
-## 1. Representação computacional
+---
 
-O grafo será armazenado em uma **lista de adjacência**. Para cada cidade `a`, sua lista contém os pares `(b, c)` de voos que saem de `a` e chegam a `b` com comprimento `c`.
+## 1. Representação Computacional
 
-Essa escolha preserva explicitamente o sentido de cada voo e seu peso. Como o número de voos é limitado a `2·10⁵`, a estrutura armazena apenas as cidades e as arestas que existem, usando espaço proporcional a `n + m`. Ela também permite percorrer diretamente todos os voos que partem de uma cidade.
+O grafo será armazenado em uma **lista de adjacência**. Para cada cidade `a` (indexada diretamente de `1` a `n`, acompanhando a numeração da entrada sem necessidade de deslocar índices para `0..n-1`), sua lista contém os pares `(b, c)` de voos que saem de `a` e chegam a `b` com comprimento `c`.
 
-## 2. Representação da instância do Marco 1
+Essa escolha preserva explicitamente o sentido de cada voo, seu peso e eventuais voos paralelos. Como $n \le 10^5$ e $m \le 2 \cdot 10^5$, uma matriz de adjacência exigiria $n^2 = 10^{10}$ células — inviável em memória e tempo de inicialização. A lista de adjacência armazena apenas as cidades e as arestas que existem, usando espaço proporcional a $n + m$, e permite percorrer diretamente todos os voos que partem de uma cidade.
 
-Entrada:
+---
+
+## 2. Representação da Instância do Marco 1
+
+**Entrada:**
 
 ```text
 4 5
@@ -29,7 +34,7 @@ Entrada:
 3 4 10
 ```
 
-Lista de adjacência:
+**Lista de adjacência:**
 
 | Cidade de origem | Voos de saída `(destino, comprimento)` |
 |---:|---|
@@ -40,7 +45,9 @@ Lista de adjacência:
 
 Por exemplo, `(3, 2)` na lista da cidade 1 significa que existe um voo de 1 para 3 com comprimento 2. Não se cria uma aresta inversa automaticamente.
 
-## 3. Validação da instância e da saída esperada
+---
+
+## 3. Validação da Instância e da Saída Esperada
 
 ### Verificação do formato
 
@@ -57,13 +64,15 @@ Por exemplo, `(3, 2)` na lista da cidade 1 significa que existe um voo de 1 para
 - **Cidade 3:** a rota `1 → 3` custa 2. A menor distância é 2.
 - **Cidade 4:** pela rota `1 → 3 → 2 → 4`, o custo é `2 + 1 + 2 = 5`. Outras alternativas informadas custam 8 (`1 → 2 → 4`) e 12 (`1 → 3 → 4`). A menor distância é 5.
 
-Saída esperada, na ordem das cidades 1, 2, 3 e 4:
+**Saída esperada, na ordem das cidades 1, 2, 3 e 4:**
 
 ```text
 0 3 2 5
 ```
 
-## 4. Critérios de validação
+---
+
+## 4. Critérios de Validação
 
 Uma validação da implementação deverá conferir que:
 
@@ -73,30 +82,15 @@ Uma validação da implementação deverá conferir que:
 - a origem tem distância 0 e os demais valores coincidem com as menores somas de comprimentos;
 - valores de distância usam precisão suficiente para os limites do problema.
 
-## 5. Classificação e escolha do algoritmo
+---
 
-O problema pertence à família de **caminho mínimo com origem única**: pede as menores distâncias saindo da cidade 1 até todas as outras, em um **grafo direcionado** (voos de mão única) e com **pesos positivos** (`c ≥ 1`).
+## 5. Classificação Preliminar do Problema
 
-Com base nessa classe, o algoritmo escolhido é o **Algoritmo de Dijkstra** (com lista de adjacência e fila de prioridade mínima):
+Com base na modelagem e na representação validadas acima, o problema pertence à família de **caminhos mínimos com origem única** (*Single-Source Shortest Paths*):
 
-- **Por que usar Dijkstra:** ele foi feito exatamente para encontrar o menor caminho a partir de uma única origem quando não há pesos negativos. A ideia é simples: começamos na cidade 1 com distância 0 e, a cada passo, escolhemos a cidade ainda não finalizada que tem a menor distância acumulada conhecida; em seguida, testamos todos os voos que saem dela para tentar melhorar (*relaxar*) a distância das cidades vizinhas. Como todos os pesos são positivos, quando uma cidade é escolhida da fila, não existe outro caminho passando por cidades futuras que possa deixá-la mais barata.
-- **Por que não usar Kruskal ou Prim:** esses algoritmos resolvem problemas de **árvore geradora mínima**, ou seja, conectar todos os vértices de um grafo não direcionado gastando o menor custo total somado na rede inteira. Nosso objetivo não é ligar todas as cidades com a menor soma global de arestas, e sim achar a menor distância individual da cidade 1 até cada destino, respeitando o sentido único dos voos.
-- **Por que não usar Ford-Fulkerson ou Edmonds-Karp:** esses algoritmos resolvem problemas de **fluxo máximo**, em que as arestas têm capacidades (por exemplo, quantos passageiros passam por um voo) e se quer enviar o maior volume possível de uma origem a um destino. Aqui as arestas representam distâncias a minimizar, não limites de capacidade.
+- **Origem única:** todas as distâncias são calculadas a partir da cidade `1`.
+- **Grafo direcionado:** os voos são de mão única (`a → b`).
+- **Pesos estritamente positivos:** $1 \le c \le 10^9$ em todas as arestas.
+- **Arestas paralelas permitidas:** múltiplos voos entre o mesmo par ordenado podem existir na entrada.
 
-## 6. Complexidade de pior caso (tempo e espaço)
-
-Considerando `n` cidades (vértices) e `m` voos (arestas), usando **lista de adjacência** e **fila de prioridade mínima (heap binário)**:
-
-### Tempo no pior caso: `O((n + m) log n)`
-
-- **Leitura e montagem do grafo:** ler as `m` linhas e preencher as `n` listas de adjacência leva tempo `O(n + m)`.
-- **Processamento dos vértices e arestas:** cada cidade é finalizada e tem seus voos de saída percorridos no máximo uma vez; ao todo, todas as `m` arestas são examinadas em tempo `O(n + m)`.
-- **Uso da fila de prioridade:** no pior caso, cada voo que melhora a distância de um destino gera uma inserção ou atualização na fila de prioridade, o que custa `O(log n)` por operação (mesmo usando uma fila padrão sem remoção de entradas antigas, o tamanho do heap fica limitado a `m ≤ n²`, mantendo o custo logarítmico em `O(log n)`).
-- **Total:** `O((n + m) log n)` no pior caso. Como todas as cidades são alcançáveis a partir da origem (`m ≥ n - 1`), isso também pode ser escrito como `O(m log n)`. Para `n ≤ 10⁵` e `m ≤ 2·10⁵`, o número de operações fica bem abaixo do limite de 1 segundo.
-
-### Espaço no pior caso: `O(n + m)`
-
-- **Lista de adjacência:** armazena `n` cabeçalhos de lista e exatamente `m` voos, usando `O(n + m)` de memória.
-- **Vetor de distâncias (e controle de visitados):** armazena um valor por cidade, usando `O(n)`.
-- **Fila de prioridade:** guarda no máximo `O(n)` elementos (em heap indexado) ou `O(m)` entradas no pior caso (em fila padrão com entradas desatualizadas).
-- **Total:** `O(n + m)` no pior caso, o que cabe com folga no limite de 512 MB.
+A escolha formal do algoritmo, a comparação com outras famílias de problemas em grafos e a análise de complexidade de pior caso são desenvolvidas no **Marco 3**.
