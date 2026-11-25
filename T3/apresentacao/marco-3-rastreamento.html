@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Marco 3 — Rastreamento Manual (Dijkstra)</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #475569;
+      --primary: #004de6;
+      --navy: #002266;
+      --success: #15803d;
+      --error: #dc2626;
+      --warning: #d97706;
+      --warn-bg: #fef3c7;
+      --pri-bg: #eff6ff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 20px;
+      line-height: 1.5;
+    }
+    .container { max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
+    .header {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
+      padding-bottom: 14px; border-bottom: 2px solid var(--border);
+    }
+    .header h1 { font-size: 21px; color: var(--navy); font-weight: 800; }
+    .header p { font-size: 13px; color: var(--muted); margin-top: 2px; }
+    .mono { font-family: 'JetBrains Mono', Consolas, monospace; }
+    .badge {
+      padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 700;
+      background: var(--card); border: 1px solid var(--border); color: var(--navy);
+    }
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 16px 18px; box-shadow: 0 3px 12px rgba(0, 34, 102, 0.04);
+    }
+    .controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+    .btn-group { display: flex; align-items: center; gap: 8px; }
+    button.ctrl {
+      border: 1px solid var(--border); background: var(--card); color: var(--text);
+      padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+    button.ctrl:hover:not(:disabled) { background: #f1f5f9; }
+    button.ctrl:disabled { opacity: 0.4; cursor: not-allowed; }
+    button.ctrl.primary { background: var(--primary); color: #fff; border-color: var(--primary); min-width: 100px; }
+    button.ctrl.primary:hover { background: #003cb8; }
+    button.toggle-adj {
+      border: 1px solid var(--primary); background: #fff; color: var(--primary);
+      padding: 4px 10px; border-radius: 7px; font-size: 12px; font-weight: 700; cursor: pointer;
+    }
+    button.toggle-adj:hover { background: var(--pri-bg); }
+    input[type="range"] { flex: 1; min-width: 180px; max-width: 400px; accent-color: var(--primary); cursor: pointer; }
+    select { padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px; }
+    .banner { border-left: 5px solid var(--primary); background: var(--pri-bg); }
+    .banner-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+    .banner-title { font-size: 16px; font-weight: 700; color: var(--navy); }
+    .banner-op { font-size: 12px; background: #fff; border: 1px solid #bfdbfe; padding: 3px 9px; border-radius: 6px; color: var(--primary); font-weight: 700; }
+    .banner-desc { font-size: 14px; color: #1e3a8a; margin-bottom: 4px; }
+    .banner-why { font-size: 13.5px; color: #334155; }
+    .grid { display: grid; grid-template-columns: 7fr 5fr; gap: 16px; }
+    @media (max-width: 960px) { .grid { grid-template-columns: 1fr; } }
+    .section-title {
+      font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--muted); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+    }
+    .legend { display: flex; gap: 12px; font-weight: 500; text-transform: none; letter-spacing: 0; }
+    .dot { width: 10px; height: 10px; border-radius: 999px; display: inline-block; margin-right: 4px; }
+    .graph-wrap { display: flex; justify-content: center; align-items: center; padding: 6px 0; }
+    .graph-footer {
+      margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border);
+      display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--muted);
+    }
+    .side-col { display: flex; flex-direction: column; gap: 14px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 8px 6px; text-align: center; border-bottom: 1px solid var(--border); }
+    th:first-child, td:first-child { text-align: left; font-weight: 700; }
+    tr:last-child td { border-bottom: none; }
+    .adj-row {
+      padding: 7px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg);
+      display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 6px;
+    }
+    .adj-row:last-child { margin-bottom: 0; }
+    .adj-row.active { border-color: var(--primary); background: var(--pri-bg); }
+    .adj-pill { padding: 2px 8px; border-radius: 6px; border: 1px solid var(--border); background: #fff; }
+    .adj-pill.active { border-color: var(--warning); background: var(--warn-bg); font-weight: 700; }
+    .adj-pill.tree { border-color: var(--success); background: #dcfce7; }
+    .pq-list { display: flex; flex-wrap: wrap; gap: 8px; min-height: 36px; align-items: center; }
+    .pq-pill { padding: 5px 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px; display: flex; gap: 6px; }
+    .pq-pill.head { border-color: var(--primary); background: var(--pri-bg); }
+    .node-circle, .edge-path { transition: all 0.25s ease; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1>Marco 3 — Rastreamento Manual do Algoritmo de Dijkstra</h1>
+        <p>Alinhado à Aula 9 (<span class="mono">A9_Caminhos_Custo_Mínimo</span>): Árvore SPT (<span class="mono">*</span>), Distância (<span class="mono">distTo[]</span>), Predecessor (<span class="mono">edgeTo[]</span>) e Relaxamento</p>
+      </div>
+      <div id="stepBadge" class="badge mono">Quadro 1 / 8</div>
+    </div>
+
+    <div class="card controls">
+      <div class="btn-group">
+        <button id="btnReset" class="ctrl">↺ Reiniciar</button>
+        <button id="btnPrev" class="ctrl">◀ Anterior</button>
+        <button id="btnPlay" class="ctrl primary">▶ Play</button>
+        <button id="btnNext" class="ctrl">Próximo ▶</button>
+      </div>
+      <input id="timeline" type="range" min="0" max="7" value="0" />
+      <div style="font-size:13px; color:var(--muted);">
+        Velocidade:
+        <select id="speedSelect">
+          <option value="2800">0.5x</option>
+          <option value="1800" selected>1x</option>
+          <option value="950">2x</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card banner">
+      <div class="banner-top">
+        <span id="frameTitle" class="banner-title"></span>
+        <span id="frameCalc" class="banner-op mono"></span>
+      </div>
+      <p id="frameDesc" class="banner-desc"></p>
+      <p class="banner-why"><strong>Decisão do algoritmo:</strong> <span id="frameWhy"></span></p>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="section-title">
+          <span>Dígrafo Ponderado e Árvore de Caminhos Mínimos (SPT)</span>
+          <div class="legend">
+            <span><span class="dot" style="background: var(--error)"></span>Na árvore (<span class="mono" style="font-weight:700">*</span>)</span>
+            <span><span class="dot" style="background: var(--warning)"></span>Relaxando</span>
+            <span><span class="dot" style="background: var(--success)"></span>Em <span class="mono">edgeTo[]</span></span>
+          </div>
+        </div>
+        <div class="graph-wrap">
+          <svg viewBox="0 0 560 320" width="100%" style="max-width:560px; height:auto;">
+            <defs>
+              <marker id="arrow-muted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8" />
+              </marker>
+              <marker id="arrow-warn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#d97706" />
+              </marker>
+              <marker id="arrow-tree" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#15803d" />
+              </marker>
+            </defs>
+            <g>
+              <path id="path-1-2" d="M 118 140 Q 210 55 302 82" fill="none" stroke-width="2.5" class="edge-path" />
+              <rect x="194" y="56" width="26" height="20" rx="5" fill="#fff" stroke="#cbd5e1" />
+              <text x="207" y="70" text-anchor="middle" font-size="12" font-family="monospace" font-weight="bold" fill="#0f172a">6</text>
+            </g>
+            <g>
+              <path id="path-1-3" d="M 118 178 Q 160 232 232 246" fill="none" stroke-width="2.5" class="edge-path" />
+              <rect x="148" y="212" width="26" height="20" rx="5" fill="#fff" stroke="#cbd5e1" />
+              <text x="161" y="226" text-anchor="middle" font-size="12" font-family="monospace" font-weight="bold" fill="#0f172a">2</text>
+            </g>
+            <g>
+              <path id="path-3-2" d="M 272 222 L 318 118" fill="none" stroke-width="2.5" class="edge-path" />
+              <rect x="272" y="156" width="26" height="20" rx="5" fill="#fff" stroke="#cbd5e1" />
+              <text x="285" y="170" text-anchor="middle" font-size="12" font-family="monospace" font-weight="bold" fill="#0f172a">1</text>
+            </g>
+            <g>
+              <path id="path-2-4" d="M 358 100 L 444 146" fill="none" stroke-width="2.5" class="edge-path" />
+              <rect x="394" y="102" width="26" height="20" rx="5" fill="#fff" stroke="#cbd5e1" />
+              <text x="407" y="116" text-anchor="middle" font-size="12" font-family="monospace" font-weight="bold" fill="#0f172a">2</text>
+            </g>
+            <g>
+              <path id="path-3-4" d="M 290 246 Q 385 245 452 184" fill="none" stroke-width="2.5" class="edge-path" />
+              <rect x="372" y="222" width="32" height="20" rx="5" fill="#fff" stroke="#cbd5e1" />
+              <text x="388" y="236" text-anchor="middle" font-size="12" font-family="monospace" font-weight="bold" fill="#0f172a">10</text>
+            </g>
+
+            <g id="node-1" transform="translate(92,160)">
+              <circle r="26" stroke-width="3" class="node-circle" />
+              <text y="6" text-anchor="middle" font-size="17" font-weight="bold" font-family="monospace">1</text>
+              <text id="star-1" x="25" y="-19" font-size="22" font-weight="bold" fill="#dc2626"></text>
+              <text id="ndist-1" y="-33" text-anchor="middle" font-size="12" font-family="monospace" font-weight="bold"></text>
+            </g>
+            <g id="node-2" transform="translate(330,90)">
+              <circle r="26" stroke-width="3" class="node-circle" />
+              <text y="6" text-anchor="middle" font-size="17" font-weight="bold" font-family="monospace">2</text>
+              <text id="star-2" x="25" y="-19" font-size="22" font-weight="bold" fill="#dc2626"></text>
+              <text id="ndist-2" y="-33" text-anchor="middle" font-size="12" font-family="monospace" font-weight="bold"></text>
+            </g>
+            <g id="node-3" transform="translate(260,248)">
+              <circle r="26" stroke-width="3" class="node-circle" />
+              <text y="6" text-anchor="middle" font-size="17" font-weight="bold" font-family="monospace">3</text>
+              <text id="star-3" x="25" y="-19" font-size="22" font-weight="bold" fill="#dc2626"></text>
+              <text id="ndist-3" y="42" text-anchor="middle" font-size="12" font-family="monospace" font-weight="bold"></text>
+            </g>
+            <g id="node-4" transform="translate(472,160)">
+              <circle r="26" stroke-width="3" class="node-circle" />
+              <text y="6" text-anchor="middle" font-size="17" font-weight="bold" font-family="monospace">4</text>
+              <text id="star-4" x="25" y="-19" font-size="22" font-weight="bold" fill="#dc2626"></text>
+              <text id="ndist-4" y="-33" text-anchor="middle" font-size="12" font-family="monospace" font-weight="bold"></text>
+            </g>
+          </svg>
+        </div>
+        <div class="graph-footer">
+          <span>Ordem de entrada na árvore (<span class="mono">*</span>): <strong id="popOrder" class="mono" style="color:var(--text)">—</strong></span>
+          <span>Saída esperada: <strong id="csesOutput" class="mono" style="color:var(--text)">0 ∞ ∞ ∞</strong></span>
+        </div>
+      </div>
+
+      <div class="side-col">
+        <div class="card">
+          <div class="section-title">
+            <span>Tabela de Rastreamento</span>
+            <span style="text-transform:none;"><strong style="color:var(--error)">*</strong> = já na árvore</span>
+          </div>
+          <table class="mono">
+            <thead>
+              <tr><th>Vértice</th><th id="vh-1">1</th><th id="vh-2">2</th><th id="vh-3">3</th><th id="vh-4">4</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Distância <span style="font-weight:400; color:var(--muted);">(distTo)</span></td><td id="dt-1"></td><td id="dt-2"></td><td id="dt-3"></td><td id="dt-4"></td></tr>
+              <tr><td>Predecessor <span style="font-weight:400; color:var(--muted);">(edgeTo)</span></td><td id="et-1"></td><td id="et-2"></td><td id="et-3"></td><td id="et-4"></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="section-title">
+            <span>Lista de Adjacência (<span id="adjSubtitle" class="mono" style="text-transform:none;">explicativa</span>)</span>
+            <button id="toggleAdjBtn" class="toggle-adj">Ver formato padrão</button>
+          </div>
+          <div id="adjList" class="mono"></div>
+        </div>
+
+        <div class="card">
+          <div class="section-title">Fila de Prioridade (<span class="mono">pq</span> — menor sai primeiro)</div>
+          <div id="pqContainer" class="pq-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ADJ_EXPLICATIVA = [
+      { v: 1, label: "1:", edges: [{ id: "1-3", text: "1→3 (peso 2)" }, { id: "1-2", text: "1→2 (peso 6)" }] },
+      { v: 2, label: "2:", edges: [{ id: "2-4", text: "2→4 (peso 2)" }] },
+      { v: 3, label: "3:", edges: [{ id: "3-4", text: "3→4 (peso 10)" }, { id: "3-2", text: "3→2 (peso 1)" }] },
+      { v: 4, label: "4:", edges: [] }
+    ];
+
+    const ADJ_PADRAO = [
+      { v: 1, label: "1", edges: [{ id: "1-2", text: "(2, 6)" }, { id: "1-3", text: "(3, 2)" }] },
+      { v: 2, label: "2", edges: [{ id: "2-4", text: "(4, 2)" }] },
+      { v: 3, label: "3", edges: [{ id: "3-2", text: "(2, 1)" }, { id: "3-4", text: "(4, 10)" }] },
+      { v: 4, label: "4", edges: [] }
+    ];
+
+    const FRAMES = [
+      {
+        title: "Início — Estado inicial das estruturas",
+        calc: "dist[1] = 0 · demais = ∞",
+        desc: "Começamos com distância 0 no vértice de origem (1) e ∞ (desconhecida) para os demais vértices. Ninguém tem predecessor ainda, e apenas o vértice 1 está na fila de candidatos.",
+        why: "A distância da origem até ela mesma é sempre 0. Ainda não exploramos nenhuma aresta.",
+        activeNode: null, doneNodes: [], activeEdge: null, treeEdges: [],
+        distTo: ["0", "∞", "∞", "∞"], pred: ["—", "—", "—", "—"], changedIdx: [1],
+        pq: [{ v: 1, d: "0" }], popped: "—"
+      },
+      {
+        title: "Passo 1a — Fecha vértice 1 (*) e relaxa a aresta 1 → 3",
+        calc: "0 + 2 = 2 < ∞  (melhorou!)",
+        desc: "Retiramos o vértice 1 da fila (ele entra na árvore: 1*) e olhamos sua lista de adjacência. Testando a aresta 1 → 3 (peso 2): 0 + 2 = 2, que é menor que ∞.",
+        why: "Como melhorou, atualizamos a distância do vértice 3 para 2 e anotamos que seu predecessor é 1.",
+        activeNode: 1, doneNodes: [1], activeEdge: "1-3", treeEdges: ["1-3"],
+        distTo: ["0", "∞", "2", "∞"], pred: ["—", "—", "1", "—"], changedIdx: [3],
+        pq: [{ v: 3, d: "2" }], popped: "1*"
+      },
+      {
+        title: "Passo 1b — Ainda no vértice 1, relaxa a aresta 1 → 2",
+        calc: "0 + 6 = 6 < ∞  (melhorou!)",
+        desc: "Continuando na lista de adjacência de 1, testamos a próxima aresta: 1 → 2 (peso 6). Somando 0 + 6 = 6, que é menor que ∞.",
+        why: "Atualizamos a distância do vértice 2 para 6 e seu predecessor para 1. Agora temos dois candidatos na fila: vértice 3 (dist 2) e vértice 2 (dist 6).",
+        activeNode: 1, doneNodes: [1], activeEdge: "1-2", treeEdges: ["1-3", "1-2"],
+        distTo: ["0", "6", "2", "∞"], pred: ["—", "1", "1", "—"], changedIdx: [2],
+        pq: [{ v: 3, d: "2" }, { v: 2, d: "6" }], popped: "1*"
+      },
+      {
+        title: "Passo 2a — Escolhe vértice 3 (*) pois 2 < 6, e relaxa 3 → 4",
+        calc: "2 + 10 = 12 < ∞  (melhorou!)",
+        desc: "Entre os vértices fora da árvore (2 com dist 6 e 3 com dist 2), escolhemos o 3 porque 2 é menor que 6! Marcamos 3* e olhamos sua lista de adjacência. Na aresta 3 → 4 (peso 10): 2 + 10 = 12 < ∞.",
+        why: "O vértice 3 sai antes do 2 porque a regra do Dijkstra é sempre pegar o candidato de menor distância. A distância até 4 fica provisoriamente em 12, com predecessor 3.",
+        activeNode: 3, doneNodes: [1, 3], activeEdge: "3-4", treeEdges: ["1-3", "1-2", "3-4"],
+        distTo: ["0", "6", "2", "12"], pred: ["—", "1", "1", "3"], changedIdx: [4],
+        pq: [{ v: 2, d: "6" }, { v: 4, d: "12" }], popped: "1* → 3*"
+      },
+      {
+        title: "Passo 2b — Ainda no vértice 3, relaxa 3 → 2 e acha atalho!",
+        calc: "2 + 1 = 3 < 6  (substitui!)",
+        desc: "Olhando a outra aresta que sai de 3 (3 → 2, peso 1): passando por 3 chegamos ao vértice 2 com custo 2 + 1 = 3, que é menor que 6!",
+        why: "Ir 1→3→2 custa 3, mais barato que o voo direto 1→2 (6). Trocamos a distância de 2 para 3, mudamos o predecessor de 2 para 3, e atualizamos sua posição na fila.",
+        activeNode: 3, doneNodes: [1, 3], activeEdge: "3-2", treeEdges: ["1-3", "3-2", "3-4"],
+        distTo: ["0", "3", "2", "12"], pred: ["—", "3", "1", "3"], changedIdx: [2],
+        pq: [{ v: 2, d: "3" }, { v: 4, d: "12" }], popped: "1* → 3*"
+      },
+      {
+        title: "Passo 3 — Escolhe vértice 2 (*) pois 3 < 12, e relaxa 2 → 4",
+        calc: "3 + 2 = 5 < 12  (substitui!)",
+        desc: "Entre os candidatos restantes (2 com dist 3 e 4 com dist 12), escolhemos o 2 (2*)! Na sua lista de adjacência há apenas 2 → 4 (peso 2): 3 + 2 = 5, que é menor que 12!",
+        why: "O atalho até 2 permitiu melhorar também o caminho até 4: ir 1→3→2→4 custa 5, bem melhor que 12. Atualizamos a distância de 4 para 5 e seu predecessor para 2.",
+        activeNode: 2, doneNodes: [1, 3, 2], activeEdge: "2-4", treeEdges: ["1-3", "3-2", "2-4"],
+        distTo: ["0", "3", "2", "5"], pred: ["—", "3", "1", "2"], changedIdx: [4],
+        pq: [{ v: 4, d: "5" }], popped: "1* → 3* → 2*"
+      },
+      {
+        title: "Passo 4 — Escolhe vértice 4 (*) com distância 5",
+        calc: "adj[4] vazia",
+        desc: "Retiramos o último vértice da fila, o 4 (4*), com distância 5. Olhando sua lista de adjacência, não há nenhuma aresta saindo do vértice 4.",
+        why: "Não há mais nenhuma aresta para relaxar e a fila de candidatos ficou vazia.",
+        activeNode: 4, doneNodes: [1, 3, 2, 4], activeEdge: null, treeEdges: ["1-3", "3-2", "2-4"],
+        distTo: ["0", "3", "2", "5"], pred: ["—", "3", "1", "2"], changedIdx: [],
+        pq: [], popped: "1* → 3* → 2* → 4*"
+      },
+      {
+        title: "Fim — Árvore de Caminhos Mínimos (SPT) completa!",
+        calc: "Saída: 0 3 2 5",
+        desc: "Todos os vértices entraram na árvore (*). Lendo a linha Distância na ordem 1, 2, 3 e 4, obtemos 0 3 2 5.",
+        why: "Seguindo os Predecessores de trás para frente: 4 vem de 2 (1→3→2→4 = 5); 2 vem de 3 (1→3→2 = 3); 3 vem de 1 (1→3 = 2).",
+        activeNode: null, doneNodes: [1, 3, 2, 4], activeEdge: null, treeEdges: ["1-3", "3-2", "2-4"],
+        distTo: ["0", "3", "2", "5"], pred: ["—", "3", "1", "2"], changedIdx: [],
+        pq: [], popped: "1* → 3* → 2* → 4*"
+      }
+    ];
+
+    let idx = 0, timer = null, adjMode = "explicativa";
+    const btnPlay = document.getElementById("btnPlay");
+    const btnPrev = document.getElementById("btnPrev");
+    const btnNext = document.getElementById("btnNext");
+    const btnReset = document.getElementById("btnReset");
+    const timeline = document.getElementById("timeline");
+    const speedSelect = document.getElementById("speedSelect");
+    const toggleAdjBtn = document.getElementById("toggleAdjBtn");
+
+    function renderAdj(f) {
+      const adjBox = document.getElementById("adjList");
+      const sub = document.getElementById("adjSubtitle");
+      adjBox.innerHTML = "";
+
+      if (adjMode === "explicativa") {
+        sub.textContent = "explicativa";
+        toggleAdjBtn.textContent = "Ver formato padrão";
+        adjBox.style.cssText = "";
+        ADJ_EXPLICATIVA.forEach(row => {
+          const div = document.createElement("div");
+          div.className = `adj-row${f.activeNode === row.v ? " active" : ""}`;
+          const label = `<strong style="min-width:22px;">${row.label}</strong>`;
+          if (row.edges.length === 0) {
+            div.innerHTML = `${label}<span style="color:var(--muted); font-style:italic;">vazia</span>`;
+          } else {
+            const pills = row.edges.map(e => {
+              let cls = "adj-pill";
+              if (f.activeEdge === e.id) cls += " active";
+              else if (f.treeEdges.includes(e.id)) cls += " tree";
+              return `<span class="${cls}">${e.text}</span>`;
+            }).join("");
+            div.innerHTML = `${label}${pills}`;
+          }
+          adjBox.appendChild(div);
+        });
+      } else {
+        sub.textContent = "padrão";
+        toggleAdjBtn.textContent = "Ver explicativa";
+        adjBox.style.cssText = "border:1px solid var(--border); border-radius:10px; background:var(--bg); padding:10px 12px; font-size:13px; display:flex; flex-direction:column; gap:4px;";
+
+        const top = document.createElement("div");
+        top.style.cssText = "font-weight:700; padding-bottom:4px; margin-bottom:2px; border-bottom:1px solid var(--border);";
+        top.textContent = "4 5";
+        adjBox.appendChild(top);
+
+        ADJ_PADRAO.forEach(row => {
+          const line = document.createElement("div");
+          line.style.cssText = "padding:2px 6px; border-radius:5px; display:flex; align-items:center; gap:8px;";
+          if (f.activeNode === row.v) line.style.background = "var(--pri-bg)";
+          const head = `<strong style="min-width:22px;">${row.label}:</strong>`;
+          if (row.edges.length === 0) {
+            line.innerHTML = `${head}<span style="color:var(--muted);">—</span>`;
+          } else {
+            const items = row.edges.map(e => {
+              let style = "";
+              if (f.activeEdge === e.id) style = "background:var(--warn-bg); font-weight:700; padding:0 4px; border-radius:4px;";
+              else if (f.treeEdges.includes(e.id)) style = "background:#dcfce7; padding:0 4px; border-radius:4px;";
+              return `<span style="${style}">${e.text}</span>`;
+            }).join(", ");
+            line.innerHTML = `${head}<span>${items}</span>`;
+          }
+          adjBox.appendChild(line);
+        });
+      }
+    }
+
+    function renderTrace() {
+      const f = FRAMES[idx];
+      document.getElementById("stepBadge").textContent = `Quadro ${idx + 1} / ${FRAMES.length}`;
+      document.getElementById("frameTitle").textContent = f.title;
+      document.getElementById("frameCalc").textContent = f.calc;
+      document.getElementById("frameDesc").textContent = f.desc;
+      document.getElementById("frameWhy").textContent = f.why;
+      document.getElementById("popOrder").textContent = f.popped;
+      document.getElementById("csesOutput").textContent = f.distTo.join(" ");
+      timeline.value = idx;
+
+      ["1-2", "1-3", "3-2", "2-4", "3-4"].forEach(eId => {
+        const path = document.getElementById(`path-${eId}`);
+        if (f.activeEdge === eId) {
+          path.style.stroke = "#d97706"; path.style.opacity = "1";
+          path.setAttribute("stroke-width", "4"); path.setAttribute("marker-end", "url(#arrow-warn)");
+        } else if (f.treeEdges.includes(eId)) {
+          path.style.stroke = "#15803d"; path.style.opacity = "1";
+          path.setAttribute("stroke-width", "3.5"); path.setAttribute("marker-end", "url(#arrow-tree)");
+        } else {
+          path.style.stroke = "#94a3b8"; path.style.opacity = "0.4";
+          path.setAttribute("stroke-width", "2"); path.setAttribute("marker-end", "url(#arrow-muted)");
+        }
+      });
+
+      for (let v = 1; v <= 4; v++) {
+        const g = document.getElementById(`node-${v}`);
+        const circle = g.querySelector("circle");
+        const numText = g.querySelector("text");
+        const star = document.getElementById(`star-${v}`);
+        const ndist = document.getElementById(`ndist-${v}`);
+        const isDone = f.doneNodes.includes(v);
+
+        star.textContent = isDone ? "*" : "";
+        ndist.textContent = `d=${f.distTo[v - 1]}`;
+        ndist.style.fill = f.changedIdx.includes(v) ? "#d97706" : "#0f172a";
+
+        if (f.activeNode === v) {
+          circle.style.fill = "#fee2e2"; circle.style.stroke = "#dc2626";
+          numText.style.fill = "#0f172a";
+        } else if (isDone) {
+          circle.style.fill = "#ffffff"; circle.style.stroke = "#dc2626";
+          numText.style.fill = "#0f172a";
+        } else {
+          circle.style.fill = "#ffffff"; circle.style.stroke = "#cbd5e1";
+          numText.style.fill = "#0f172a";
+        }
+
+        document.getElementById(`vh-${v}`).innerHTML = isDone ? `${v}<span style="color:#dc2626">*</span>` : `${v}`;
+        const dtCell = document.getElementById(`dt-${v}`);
+        const etCell = document.getElementById(`et-${v}`);
+        dtCell.textContent = f.distTo[v - 1];
+        etCell.textContent = f.pred[v - 1];
+        const isChanged = f.changedIdx.includes(v);
+        dtCell.style.background = isChanged ? "#fef3c7" : "transparent";
+        etCell.style.background = isChanged ? "#fef3c7" : "transparent";
+        dtCell.style.fontWeight = isChanged ? "700" : "400";
+      }
+
+      renderAdj(f);
+
+      const pqBox = document.getElementById("pqContainer");
+      pqBox.innerHTML = "";
+      if (f.pq.length === 0) {
+        pqBox.innerHTML = '<span class="mono" style="font-size:13px; color:#64748b; font-style:italic;">[ ] (fila vazia)</span>';
+      } else {
+        f.pq.forEach((item, i) => {
+          const pill = document.createElement("div");
+          pill.className = `pq-pill mono${i === 0 ? " head" : ""}`;
+          pill.innerHTML = `<strong>v=${item.v}</strong><span style="color:#475569">dist=${item.d}</span>`;
+          pqBox.appendChild(pill);
+        });
+      }
+
+      btnPrev.disabled = idx === 0;
+      btnNext.disabled = idx === FRAMES.length - 1;
+    }
+
+    function stopPlay() { if (timer) { clearInterval(timer); timer = null; } btnPlay.textContent = "▶ Play"; }
+    function togglePlay() {
+      if (timer) { stopPlay(); return; }
+      if (idx === FRAMES.length - 1) idx = 0;
+      renderTrace();
+      btnPlay.textContent = "⏸ Pausar";
+      timer = setInterval(() => {
+        if (idx < FRAMES.length - 1) { idx++; renderTrace(); } else { stopPlay(); }
+      }, Number(speedSelect.value));
+    }
+
+    toggleAdjBtn.addEventListener("click", () => {
+      adjMode = adjMode === "explicativa" ? "padrao" : "explicativa";
+      renderAdj(FRAMES[idx]);
+    });
+    btnPlay.addEventListener("click", togglePlay);
+    btnPrev.addEventListener("click", () => { stopPlay(); if (idx > 0) { idx--; renderTrace(); } });
+    btnNext.addEventListener("click", () => { stopPlay(); if (idx < FRAMES.length - 1) { idx++; renderTrace(); } });
+    btnReset.addEventListener("click", () => { stopPlay(); idx = 0; renderTrace(); });
+    timeline.addEventListener("input", (e) => { stopPlay(); idx = Number(e.target.value); renderTrace(); });
+    speedSelect.addEventListener("change", () => { if (timer) { stopPlay(); togglePlay(); } });
+    renderTrace();
+  </script>
+</body>
+</html>
